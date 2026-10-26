@@ -2,71 +2,87 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Veritas Investigative Intelligence</title>
-<meta name="description" content="Public-record investigative research workspace — Wikidata, SEC EDGAR, GDELT, historical indexes." />
+<meta name="description" content="Public-record investigative research workspace — Wikidata, SEC EDGAR, GDELT, historical indexes. Northstar Ledger field desk." />
+<meta name="theme-color" content="#0b0f14" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f14'/%3E%3Ccircle cx='32' cy='32' r='14' fill='none' stroke='%2335E0D0' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%2335E0D0'/%3E%3C/svg%3E" />
 <style>
 :root {
-  --bg: #0b0f14; --panel: #121a22; --line: #1e2a36; --text: #e8eef4; --muted: #8aa0b5;
-  --accent: #3dd6c6; --accent2: #5b8cff; --warn: #f0b429; --danger: #ff6b6b; --ok: #3dd68c;
-  --radius: 14px; --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --bg:#090d16; --panel:#121a22; --surface:#0d151d; --line:#1e2a36; --text:#e8eef4; --muted:#8aa0b5;
+  --accent:#35E0D0; --accent2:#5b8cff; --violet:#A78BFA; --amber:#FBBF24; --danger:#FB7185; --ok:#3dd68c;
+  --radius:14px; --font:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
 }
-* { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); }
-a { color: var(--accent2); }
-.app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
-.nav { background: #0a1017; border-right: 1px solid var(--line); padding: 20px 14px; position: sticky; top: 0; height: 100vh; }
-.brand { font-weight: 700; letter-spacing: .04em; font-size: 15px; margin-bottom: 6px; }
-.brand span { color: var(--accent); }
-.tag { color: var(--muted); font-size: 11px; margin-bottom: 22px; }
-.nav button {
-  width: 100%; text-align: left; background: transparent; border: 1px solid transparent;
-  color: var(--text); padding: 10px 12px; border-radius: 10px; margin-bottom: 6px; cursor: pointer; font-size: 13px;
-}
-.nav button.active, .nav button:hover { background: var(--panel); border-color: var(--line); }
-.main { padding: 22px 28px 60px; max-width: 1100px; }
-.header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
-.h1 { font-size: 22px; margin: 0; }
-.badge { font-size: 11px; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
-.badge.ok { border-color: #1f5; color: var(--ok); background: rgba(61,214,140,.08); }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
-.row { display: flex; gap: 10px; flex-wrap: wrap; }
-input, select {
-  flex: 1; min-width: 180px; background: #0b1219; border: 1px solid var(--line); color: var(--text);
-  border-radius: 10px; padding: 12px 14px; font-size: 14px; outline: none;
-}
-input:focus { border-color: var(--accent); }
-button.primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #041018; border: 0;
-  border-radius: 10px; padding: 12px 16px; font-weight: 700; cursor: pointer;
-}
-button.ghost { background: transparent; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 10px 12px; cursor: pointer; }
-.muted { color: var(--muted); font-size: 13px; line-height: 1.5; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-.card {
-  background: #0d151d; border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px;
-}
-.card h3 { margin: 0; font-size: 14px; line-height: 1.35; }
-.meta { font-size: 11px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; }
-.pill { border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; }
-.pill.source { color: var(--accent); border-color: rgba(61,214,198,.35); }
-.conf { color: var(--warn); }
-.summary { font-size: 13px; color: #c5d2de; line-height: 1.45; flex: 1; }
-.warns { margin-top: 10px; }
-.warn { background: rgba(240,180,41,.08); border: 1px solid rgba(240,180,41,.3); color: #f3d98c; padding: 8px 10px; border-radius: 8px; font-size: 12px; margin-bottom: 6px; }
-.hidden { display: none !important; }
-.statrow { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 10px; }
-.stat { background: #0d151d; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
-.stat .n { font-size: 22px; font-weight: 700; }
-.stat .l { font-size: 11px; color: var(--muted); margin-top: 4px; }
-.table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.table th, .table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
-.footer { margin-top: 28px; color: var(--muted); font-size: 12px; }
-@media (max-width: 860px) {
-  .app { grid-template-columns: 1fr; }
-  .nav { height: auto; position: relative; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-  .nav .tag, .nav .brand { width: 100%; }
-  .nav button { width: auto; }
+*{box-sizing:border-box} html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--font)}
+a{color:var(--accent2)} button{font:inherit}
+.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+.nav{background:#0a1017;border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{font-weight:800;letter-spacing:.06em;font-size:14px;margin-bottom:4px}
+.brand span{color:var(--accent)}
+.tag{color:var(--muted);font-size:11px;margin-bottom:18px;line-height:1.4}
+.nav button{width:100%;text-align:left;background:transparent;border:1px solid transparent;color:var(--text);padding:10px 12px;border-radius:10px;margin-bottom:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px}
+.nav button.active,.nav button:hover{background:var(--panel);border-color:var(--line)}
+.nav .dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.nav button.active .dot{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.main{padding:22px 28px 70px;max-width:1120px}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.eyebrow{color:var(--accent);font-size:10px;font-weight:900;letter-spacing:1.4px;margin:0 0 6px}
+.h1{font-size:24px;margin:0;font-weight:800}
+.sub{color:var(--muted);font-size:13px;margin-top:6px}
+.badge{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.badge.ok{border-color:rgba(61,214,140,.45);color:var(--ok);background:rgba(61,214,140,.08)}
+.badge.warn{border-color:rgba(251,191,36,.45);color:var(--amber);background:rgba(251,191,36,.08)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input,select,textarea{flex:1;min-width:160px;background:#0b1219;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:12px 14px;font-size:14px;outline:none}
+input:focus,textarea:focus{border-color:var(--accent)}
+button.primary{background:linear-gradient(135deg,var(--accent),#2bb8d4);color:#041018;border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;cursor:pointer}
+button.chip{background:rgba(53,224,208,.08);border:1px solid rgba(53,224,208,.25);color:var(--accent);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:700}
+.muted{color:var(--muted);font-size:13px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.card h3{margin:0;font-size:14px;line-height:1.35;font-weight:800}
+.meta{font-size:11px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.pill.source{color:var(--accent);border-color:rgba(53,224,208,.35)}
+.pill.violet{color:var(--violet);border-color:rgba(167,139,250,.4)}
+.pill.amber{color:var(--amber);border-color:rgba(251,191,36,.4)}
+.pill.red{color:var(--danger);border-color:rgba(251,113,133,.45)}
+.pill.ok{color:var(--ok);border-color:rgba(61,214,140,.4)}
+.conf{color:var(--amber)}
+.summary{font-size:13px;color:#c5d2de;line-height:1.45;flex:1}
+.warns{margin-top:10px}
+.warn{background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.3);color:#f3d98c;padding:8px 10px;border-radius:8px;font-size:12px;margin-bottom:6px}
+.hidden{display:none!important}
+.statrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat .n{font-size:22px;font-weight:800}
+.stat .l{font-size:11px;color:var(--muted);margin-top:4px}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table th,.table td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.footer{margin-top:28px;color:var(--muted);font-size:12px}
+.case-hero{background:linear-gradient(160deg,rgba(53,224,208,.12),rgba(167,139,250,.06) 50%,var(--panel));border:1px solid rgba(53,224,208,.28)}
+.progress{height:7px;border-radius:7px;background:#253145;overflow:hidden;margin-top:8px}
+.progress>i{display:block;height:100%;background:var(--accent);border-radius:7px}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.quick button{min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-radius:16px;background:var(--surface);border:1px solid var(--line);color:var(--text);cursor:pointer;font-size:12px;font-weight:700}
+.quick button:hover{border-color:rgba(53,224,208,.4)}
+.feed-row{display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid rgba(30,42,54,.8)}
+.feed-row:last-child{border-bottom:0}
+.feed-ico{width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center;border:1px solid;font-size:12px;flex-shrink:0}
+.signal-map{position:relative;height:220px;border-radius:14px;background:radial-gradient(circle at 50% 50%,#15202c 0%,#0b1219 70%);border:1px solid var(--line);overflow:hidden}
+.signal-map .node{position:absolute;transform:translate(-50%,-50%);padding:6px 10px;border-radius:999px;border:1px solid;font-size:11px;font-weight:800;background:rgba(9,13,22,.85);white-space:nowrap}
+.bar{height:6px;border-radius:6px;background:#253145;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:6px}
+.toast{position:fixed;bottom:18px;right:18px;background:#12202c;border:1px solid var(--line);padding:12px 16px;border-radius:12px;font-size:13px;z-index:50;box-shadow:0 12px 40px rgba(0,0,0,.35);max-width:320px}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .nav{height:auto;position:relative;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .nav .tag,.nav .brand{width:100%}
+  .nav button{width:auto}
+  .quick{grid-template-columns:1fr}
+  .main{padding:16px 14px 60px}
 }
 </style>
 </head>
@@ -74,24 +90,57 @@ button.ghost { background: transparent; border: 1px solid var(--line); color: va
 <div class="app">
   <aside class="nav">
     <div class="brand">VERITAS <span>OSINT</span></div>
-    <div class="tag">Public-record investigative workspace</div>
-    <button class="active" data-view="research">Public Research</button>
-    <button data-view="briefing">Briefing</button>
-    <button data-view="vault">Evidence Vault</button>
-    <button data-view="analysis">Pattern Finder</button>
-    <button data-view="team">Collaboration</button>
-    <button data-view="copilot">Copilot</button>
-    <button data-view="status">System Status</button>
+    <div class="tag">Public-record investigative workspace · safety ceiling enforced</div>
+    <button class="active" data-view="desk"><span class="dot"></span>Field Desk</button>
+    <button data-view="research"><span class="dot"></span>Public Research</button>
+    <button data-view="briefing"><span class="dot"></span>Briefing</button>
+    <button data-view="vault"><span class="dot"></span>Evidence Vault</button>
+    <button data-view="analysis"><span class="dot"></span>Pattern Finder</button>
+    <button data-view="team"><span class="dot"></span>Collaboration</button>
+    <button data-view="copilot"><span class="dot"></span>Copilot</button>
+    <button data-view="status"><span class="dot"></span>System Status</button>
   </aside>
   <main class="main">
     <div class="header">
-      <h1 class="h1" id="viewTitle">Public Research</h1>
+      <div>
+        <p class="eyebrow" id="viewEyebrow">VERITAS / FIELD DESK</p>
+        <h1 class="h1" id="viewTitle">Good evening, Maya</h1>
+        <div class="sub" id="viewSub">Your case desk is quiet. The signal is not.</div>
+      </div>
       <div id="healthBadge" class="badge">checking…</div>
     </div>
 
-    <section id="view-research" class="view">
+    <!-- FIELD DESK -->
+    <section id="view-desk" class="view">
+      <div class="panel" style="padding:12px">
+        <div class="row">
+          <input id="deskQ" placeholder="Search a person or business in public records" />
+          <button class="primary" id="btnDeskSearch">Search</button>
+        </div>
+        <div class="muted" style="margin-top:8px;font-size:11px">Wikidata · SEC EDGAR · GDELT news · connected public posts</div>
+      </div>
+      <div class="panel case-hero" id="caseCard"></div>
+      <div class="quick">
+        <button data-jump="briefing">＋ New case</button>
+        <button data-jump="vault">⬆ Import evidence</button>
+        <button data-jump="analysis">◎ View leads</button>
+      </div>
       <div class="panel">
-        <div class="muted" style="margin-bottom:10px">Search public sources only (Wikidata, SEC EDGAR, GDELT, optional X). Results are leads, not findings. Credential / private-access queries are blocked.</div>
+        <div class="meta" style="margin-bottom:10px"><strong style="color:var(--text);font-size:13px">Signal map</strong><span class="pill source">LIVE</span></div>
+        <div class="signal-map" id="signalMap"></div>
+      </div>
+      <div class="statrow" id="deskStats"></div>
+      <div class="panel" style="margin-top:14px">
+        <div class="meta" style="margin-bottom:6px"><strong style="color:var(--text)">Signal feed</strong><span class="pill amber">LIVE</span></div>
+        <div id="signalFeed"></div>
+      </div>
+      <div class="panel" id="deskCopilot"></div>
+    </section>
+
+    <!-- RESEARCH -->
+    <section id="view-research" class="view hidden">
+      <div class="panel">
+        <div class="muted" style="margin-bottom:10px">Search public sources only (Wikidata, SEC EDGAR, GDELT, optional X). Results are <b>leads</b>, not findings. Credential / private-access queries are blocked by query-safety.</div>
         <div class="row">
           <input id="q" placeholder="Name, company, ticker, or domain…" value="Microsoft" />
           <button class="primary" id="btnSearch">Search</button>
@@ -102,54 +151,76 @@ button.ghost { background: transparent; border: 1px solid var(--line); color: va
       <div id="researchGrid" class="grid"></div>
     </section>
 
+    <!-- BRIEFING -->
     <section id="view-briefing" class="view hidden">
-      <div class="panel">
-        <div class="muted">Northstar Ledger fixture briefing + live public research handoff. Production cases require membership, encryption, and audit before real material.</div>
-      </div>
       <div class="statrow" id="briefStats"></div>
-      <div class="panel" style="margin-top:16px">
-        <h3 style="margin:0 0 8px">Today’s desk</h3>
-        <div class="muted">Use Public Research for live source-cited leads. Vault holds case artifacts once authenticated storage is configured.</div>
+      <div class="panel" style="margin-top:14px">
+        <h3 style="margin:0 0 8px;font-size:14px">Today’s desk</h3>
+        <div class="muted">Northstar Ledger fixture briefing + live public research handoff. Production cases require membership, encryption, and audit before real material.</div>
+        <div id="briefList" style="margin-top:12px"></div>
       </div>
     </section>
 
+    <!-- VAULT -->
     <section id="view-vault" class="view hidden">
       <div class="panel">
-        <div class="muted">Evidence Vault UI is present. Server storage requires DATABASE_URL + auth. Restricted items remain quarantined until review.</div>
+        <div class="muted">Evidence Vault — fixture chain-of-custody + local session notes. Restricted items remain quarantined. Server storage requires DATABASE_URL + auth.</div>
         <div class="row" style="margin-top:12px">
-          <input id="vaultNote" placeholder="Local session note (not persisted server-side without auth)" />
-          <button class="ghost" id="btnVaultAdd">Add local note</button>
+          <input id="vaultNote" placeholder="Add local session note (not server-persisted without auth)" />
+          <button class="ghost" id="btnVaultAdd">Add note</button>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="chip" data-vfilter="all">All</button>
+          <button class="chip" data-vfilter="verified">Verified</button>
+          <button class="chip" data-vfilter="uncertain">Uncertain</button>
+          <button class="chip" data-vfilter="restricted">Restricted</button>
         </div>
       </div>
-      <ul id="vaultList" class="muted"></ul>
+      <div class="grid" id="vaultGrid"></div>
+      <ul id="vaultList" class="muted" style="padding-left:18px"></ul>
     </section>
 
+    <!-- ANALYSIS -->
     <section id="view-analysis" class="view hidden">
       <div class="panel">
-        <div class="muted">Pattern Finder — source diversity, confidence spread, and connector health for the last query.</div>
+        <div class="muted">Pattern Finder — entity clusters, temporal anomalies, ethical holds. Insights are recommendations, not conclusions.</div>
       </div>
-      <div id="analysisOut" class="panel muted">Run a Public Research query first.</div>
+      <div class="grid" id="insightGrid"></div>
+      <div class="panel" style="margin-top:8px">
+        <div class="meta" style="margin-bottom:8px"><strong style="color:var(--text)">Last public research analysis</strong></div>
+        <div id="analysisOut" class="muted">Run a Public Research query first.</div>
+      </div>
     </section>
 
+    <!-- TEAM -->
     <section id="view-team" class="view hidden">
       <div class="panel">
-        <div class="muted">Collaboration Hub placeholder. Wire OAuth (MANUS_*) for multi-user case membership. Current mode: single-operator public research.</div>
+        <div class="muted">Collaboration Hub — single-operator public research mode. Wire OAuth (MANUS_*) for multi-user case membership.</div>
+      </div>
+      <div class="grid" id="teamGrid"></div>
+      <div class="panel">
+        <div class="meta" style="margin-bottom:8px"><strong style="color:var(--text)">Audit trail</strong></div>
+        <div id="auditList"></div>
       </div>
     </section>
 
+    <!-- COPILOT -->
     <section id="view-copilot" class="view hidden">
       <div class="panel">
         <div class="muted">Investigative Copilot is assistive only. It does not invent private data and must keep source trails visible.</div>
+        <div class="row" style="margin-top:10px;flex-wrap:wrap" id="copilotChips"></div>
         <div class="row" style="margin-top:10px">
-          <input id="copilotIn" placeholder="Ask about last research results…" />
+          <input id="copilotIn" placeholder="Ask about last research results or Northstar case…" />
           <button class="primary" id="btnCopilot">Assist</button>
         </div>
       </div>
       <div id="copilotOut" class="panel muted"></div>
     </section>
 
+    <!-- STATUS -->
     <section id="view-status" class="view hidden">
-      <div class="panel">
+      <div class="statrow" id="statusStats"></div>
+      <div class="panel" style="margin-top:14px">
         <table class="table" id="connTable">
           <thead><tr><th>Connector</th><th>Status</th><th>Credential</th><th>Retention</th></tr></thead>
           <tbody></tbody>
@@ -158,181 +229,409 @@ button.ghost { background: transparent; border: 1px solid var(--line); color: va
       <div class="panel muted" id="statusDetail">Loading…</div>
     </section>
 
-    <div class="footer">Veritas Investigative Intelligence · public-record ceiling · no credential targeting · API <code>/api/health</code> · research <code>/api/research/search?q=</code></div>
+    <div class="footer">Veritas Investigative Intelligence · public-record ceiling · no credential targeting · dual-mode SPA · <code>/api/health</code> · <code>/api/research/search?q=</code></div>
   </main>
 </div>
 <script>
+/* ========= fixtures (Northstar Ledger) ========= */
+const CASE = { id:"case-001", name:"Northstar Ledger", status:"Active / 14 days", description:"Follow the money trail across three shell entities and two public procurement records.", progress:68, sources:42, entities:18, signals:7 };
+const EVIDENCE = [
+  {id:"ev-001",title:"Port Authority tender ledger — Q3",type:"Document",status:"verified",score:96,date:"18 Oct 2026",size:"4.8 MB",source:"Public procurement portal",license:"Open government data",tags:["procurement","Northstar","Q3"],custody:["Imported by Maya Chen · 18 Oct","Hash verified · 18 Oct","Source checked · 19 Oct"],summary:"A structured export with 19 award records. Two vendor names overlap with the Northstar network."},
+  {id:"ev-002",title:"Invoice_4481_redacted.pdf",type:"Document",status:"uncertain",score:72,date:"17 Oct 2026",size:"1.2 MB",source:"Anonymous submission",license:"Consent pending",tags:["invoice","redaction","review"],custody:["Received via secure drop · 17 Oct","Metadata mismatch flagged · 17 Oct"],summary:"Invoice references a contractor name found in the tender ledger. Original provenance needs human review."},
+  {id:"ev-003",title:"Harbor route audio memo",type:"Audio",status:"verified",score:88,date:"14 Oct 2026",size:"18.4 MB",source:"Reporter interview",license:"Reporter-owned recording",tags:["harbor","interview","route"],custody:["Recorded by Maya Chen · 14 Oct","Transcript generated · 15 Oct"],summary:"Interview places a Northstar intermediary at the same harbor office as a flagged vendor."},
+  {id:"ev-004",title:"Private contact export",type:"Note",status:"restricted",score:41,date:"11 Oct 2026",size:"82 KB",source:"Unverified third party",license:"Restricted / consent missing",tags:["contacts","privacy","hold"],custody:["Imported by Arun Patel · 11 Oct","Consent review required · 11 Oct"],summary:"Contains personal contact details unrelated to the public-interest question. Keep quarantined."},
+  {id:"ev-005",title:"Harbor office exterior — 2026-10-08",type:"Image",status:"verified",score:91,date:"08 Oct 2026",size:"7.1 MB",source:"Reporter field photo",license:"Reporter-owned image",tags:["harbor","location","field"],custody:["Captured by Sam Okafor · 08 Oct","EXIF preserved · 08 Oct"],summary:"Geotag places the office within 150m of the registered address for a Northstar supplier."}
+];
+const INSIGHTS = [
+  {id:"in-001",title:"Two vendors share a director",detail:"Northstar Marine and Harbor Civic appear to share a director across 6 award records.",confidence:94,tone:"cyan",signal:"ENTITY CLUSTER"},
+  {id:"in-002",title:"Payment cadence breaks pattern",detail:"Three transfers land 48–72 hours before procurement milestones in the ledger.",confidence:81,tone:"violet",signal:"TEMPORAL ANOMALY"},
+  {id:"in-003",title:"Source consent needs review",detail:"The private contact export contains personal data that is not necessary for this case.",confidence:99,tone:"red",signal:"ETHICAL HOLD"}
+];
+const NODES = [
+  {id:"n1",label:"Northstar",kind:"organization",x:50,y:43,color:"#35E0D0"},
+  {id:"n2",label:"Harbor Civic",kind:"organization",x:23,y:25,color:"#A78BFA"},
+  {id:"n3",label:"A. Mercer",kind:"person",x:76,y:25,color:"#FBBF24"},
+  {id:"n4",label:"Port Authority",kind:"organization",x:22,y:72,color:"#35E0D0"},
+  {id:"n5",label:"Harbor Office",kind:"location",x:78,y:71,color:"#F472B6"}
+];
+const TASKS = [
+  {id:"t1",title:"Verify director overlap",owner:"Maya",progress:0.82,status:"In review"},
+  {id:"t2",title:"Request tender metadata",owner:"Arun",progress:0.45,status:"Active"},
+  {id:"t3",title:"Draft source note",owner:"Sam",progress:0.18,status:"Queued"}
+];
+const AUDIT = [
+  {id:"a1",actor:"Maya Chen",action:"reviewed tender ledger",timestamp:"2m ago",tone:"cyan"},
+  {id:"a2",actor:"Arun Patel",action:"added a provenance note",timestamp:"28m ago",tone:"violet"},
+  {id:"a3",actor:"Sam Okafor",action:"flagged a consent issue",timestamp:"1h ago",tone:"amber"}
+];
+const COPILOT_CHIPS = [
+  "Summarize the strongest verified signal",
+  "What needs human review before publication?",
+  "Find connections to Harbor Civic"
+];
+
+/* ========= state ========= */
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 let lastResearch = null;
-const vault = JSON.parse(localStorage.getItem('veritas_vault') || '[]');
+let vaultFilter = "all";
+const vaultNotes = JSON.parse(localStorage.getItem("veritas_vault") || "[]");
+const hour = new Date().getHours();
+const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
-function setView(name) {
-  $$('.nav button').forEach(b => b.classList.toggle('active', b.dataset.view === name));
-  $$('.view').forEach(v => v.classList.toggle('hidden', v.id !== 'view-' + name));
-  const titles = {
-    research: 'Public Research', briefing: 'Briefing Desk', vault: 'Evidence Vault',
-    analysis: 'Pattern Finder', team: 'Collaboration', copilot: 'Investigative Copilot', status: 'System Status'
-  };
-  $('#viewTitle').textContent = titles[name] || name;
-  if (name === 'status') loadCapabilities();
-  if (name === 'briefing') renderBriefing();
-  if (name === 'vault') renderVault();
-  if (name === 'analysis') renderAnalysis();
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&","<":"<",">":">",'"':""","'":"&#39;"}[c]));
+}
+function statusPill(st) {
+  if (st === "verified") return '<span class="pill ok">verified</span>';
+  if (st === "uncertain") return '<span class="pill amber">uncertain</span>';
+  return '<span class="pill red">restricted</span>';
+}
+function tonePill(t) {
+  if (t === "cyan") return "source";
+  if (t === "violet") return "violet";
+  if (t === "red") return "red";
+  return "amber";
+}
+function toast(msg) {
+  const el = document.createElement("div");
+  el.className = "toast"; el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2800);
 }
 
-$$('.nav button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+const titles = {
+  desk: { eyebrow:"VERITAS / FIELD DESK", title: greeting + ", Maya", sub:"Your case desk is quiet. The signal is not." },
+  research: { eyebrow:"VERITAS / PUBLIC RESEARCH", title:"Public Research", sub:"Source-cited leads from public records only." },
+  briefing: { eyebrow:"VERITAS / BRIEFING", title:"Briefing Desk", sub:"Northstar Ledger + live research handoff." },
+  vault: { eyebrow:"VERITAS / VAULT", title:"Evidence Vault", sub:"Provenance · custody · ethical holds." },
+  analysis: { eyebrow:"VERITAS / ANALYSIS", title:"Pattern Finder", sub:"Recommendations, not conclusions." },
+  team: { eyebrow:"VERITAS / COLLAB", title:"Collaboration Hub", sub:"Tasks · audit · secure room status." },
+  copilot: { eyebrow:"VERITAS / COPILOT", title:"Investigative Copilot", sub:"Assistive only · source trails required." },
+  status: { eyebrow:"VERITAS / SYSTEM", title:"System Status", sub:"Connectors · health · dual-mode." }
+};
 
+function setView(name) {
+  $$(".nav button").forEach(b => b.classList.toggle("active", b.dataset.view === name));
+  $$(".view").forEach(v => v.classList.toggle("hidden", v.id !== "view-" + name));
+  const t = titles[name] || titles.desk;
+  $("#viewEyebrow").textContent = t.eyebrow;
+  $("#viewTitle").textContent = t.title;
+  $("#viewSub").textContent = t.sub;
+  if (name === "status") loadCapabilities();
+  if (name === "briefing") renderBriefing();
+  if (name === "vault") renderVault();
+  if (name === "analysis") renderAnalysis();
+  if (name === "team") renderTeam();
+  if (name === "desk") renderDesk();
+  if (name === "copilot") renderCopilotChips();
+}
+
+$$(".nav button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
+$$("[data-jump]").forEach(b => b.addEventListener("click", () => setView(b.dataset.jump)));
+
+/* ========= health ========= */
 async function checkHealth() {
   try {
-    const r = await fetch('/api/health', { cache: 'no-store' });
+    const r = await fetch("/api/health", { cache: "no-store" });
     const j = await r.json();
-    const el = $('#healthBadge');
-    if (j.ok) { el.textContent = 'API online'; el.className = 'badge ok'; }
-    else { el.textContent = 'API degraded'; el.className = 'badge'; }
+    const el = $("#healthBadge");
+    if (j.ok) { el.textContent = "API online · " + (j.service || "veritas"); el.className = "badge ok"; }
+    else { el.textContent = "API degraded"; el.className = "badge warn"; }
   } catch {
-    $('#healthBadge').textContent = 'API offline';
-    $('#healthBadge').className = 'badge';
+    $("#healthBadge").textContent = "Static dual-mode";
+    $("#healthBadge").className = "badge warn";
   }
 }
 
+/* ========= desk ========= */
+function renderDesk() {
+  $("#caseCard").innerHTML = `
+    <div class="meta"><span class="pill source">ACTIVE INVESTIGATION</span><span class="pill ok">LIVE</span></div>
+    <h2 style="margin:8px 0 0;font-size:22px">${escapeHtml(CASE.name)}</h2>
+    <div class="muted" style="margin-top:8px">${escapeHtml(CASE.description)}</div>
+    <div class="meta" style="margin-top:14px;justify-content:space-between"><span>CASE SIGNAL COVERAGE</span><span style="color:var(--accent);font-weight:800">${CASE.progress}%</span></div>
+    <div class="progress"><i style="width:${CASE.progress}%"></i></div>
+    <div class="meta" style="margin-top:10px;justify-content:space-between"><span>Updated 2m ago</span><span>${escapeHtml(CASE.status)}</span></div>`;
+  $("#deskStats").innerHTML = `
+    <div class="stat"><div class="n" style="color:var(--accent)">${CASE.sources}</div><div class="l">Sources indexed</div></div>
+    <div class="stat"><div class="n" style="color:var(--violet)">${CASE.entities}</div><div class="l">Entities linked</div></div>
+    <div class="stat"><div class="n" style="color:var(--amber)">${CASE.signals}</div><div class="l">Signals to review</div></div>
+    <div class="stat"><div class="n">${vaultNotes.length}</div><div class="l">Local vault notes</div></div>`;
+  $("#signalMap").innerHTML = NODES.map(n =>
+    `<div class="node" style="left:${n.x}%;top:${n.y}%;color:${n.color};border-color:${n.color}66">${escapeHtml(n.label)}</div>`
+  ).join("");
+  $("#signalFeed").innerHTML = [
+    {ico:"◎",c:"#35E0D0",t:"Director overlap detected",b:"Northstar Marine ↔ Harbor Civic",time:"2m ago"},
+    {ico:"◷",c:"#A78BFA",t:"Payment cadence breaks pattern",b:"3 transfers before milestones",time:"18m ago"},
+    {ico:"!",c:"#FBBF24",t:"Consent review required",b:"Private contact export quarantined",time:"1h ago"}
+  ].map(f => `<div class="feed-row"><div class="feed-ico" style="color:${f.c};border-color:${f.c}55;background:${f.c}16">${f.ico}</div>
+    <div style="flex:1"><div style="font-weight:800;font-size:13px">${escapeHtml(f.t)}</div><div class="muted" style="font-size:12px">${escapeHtml(f.b)}</div></div>
+    <div class="muted" style="font-size:11px">${f.time}</div></div>`).join("");
+  $("#deskCopilot").innerHTML = `
+    <div class="meta"><span class="pill violet">ASSISTIVE</span><span>Copilot brief</span></div>
+    <div style="margin-top:10px;font-weight:800">One review item needs your attention</div>
+    <div class="muted" style="margin-top:6px">“The private contact export should remain quarantined until consent is documented.”</div>
+    <div class="meta" style="margin-top:12px;justify-content:space-between"><span class="pill violet">HUMAN REVIEW</span><span>96% context confidence</span></div>
+    <div class="bar" style="margin-top:8px"><i style="width:96%;background:var(--violet)"></i></div>
+    <div style="margin-top:12px"><button class="ghost" onclick="setView('copilot')">Open Copilot →</button></div>`;
+}
+$("#btnDeskSearch").onclick = () => {
+  const v = $("#deskQ").value.trim();
+  if (v.length < 2) return;
+  $("#q").value = v;
+  setView("research");
+  runSearch();
+};
+$("#deskQ").addEventListener("keydown", e => { if (e.key === "Enter") $("#btnDeskSearch").click(); });
+
+/* ========= research ========= */
 function card(item) {
   return `<article class="card">
-    <div class="meta"><span class="pill source">${item.source}</span><span class="pill conf">${item.confidence}% conf</span><span class="pill">${item.entityType || 'unknown'}</span></div>
+    <div class="meta"><span class="pill source">${escapeHtml(item.source)}</span><span class="pill conf">${item.confidence}% conf</span><span class="pill">${escapeHtml(item.entityType || "unknown")}</span></div>
     <h3>${escapeHtml(item.title)}</h3>
-    <div class="summary">${escapeHtml(item.summary || '')}</div>
-    <div class="meta"><a href="${item.url}" target="_blank" rel="noopener">Open source</a><span>${escapeHtml(item.provenance || '')}</span></div>
+    <div class="summary">${escapeHtml(item.summary || "")}</div>
+    <div class="meta"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Open source</a><span>${escapeHtml(item.provenance || "")}</span></div>
   </article>`;
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c]));
-}
-
-async function runSearch() {
-  const q = $('#q').value.trim();
-  if (q.length < 2) return;
-  $('#researchMeta').textContent = 'Searching public sources…';
-  $('#researchGrid').innerHTML = '';
-  $('#researchWarns').innerHTML = '';
-  try {
-    const r = await fetch('/api/research/search?q=' + encodeURIComponent(q));
-    const j = await r.json();
-    if (!j.ok) throw new Error(j.error || 'search failed');
-    lastResearch = j.data;
-    const d = j.data;
-    $('#researchMeta').textContent = `${d.results.length} results for “${d.query}” · ${new Date(d.searchedAt).toLocaleString()} · sources: ${(d.sources||[]).join(', ')}`;
-    $('#researchWarns').innerHTML = (d.warnings||[]).map(w => `<div class="warn">${escapeHtml(w)}</div>`).join('');
-    $('#researchGrid').innerHTML = d.results.map(card).join('') || '<div class="muted">No matches.</div>';
-    renderAnalysis();
-  } catch (e) {
-    $('#researchMeta').textContent = 'Error: ' + e.message;
-  }
-}
-
-$('#btnSearch').addEventListener('click', runSearch);
-$('#q').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
-
-async function loadCapabilities() {
-  try {
-    const r = await fetch('/api/research/capabilities');
-    const j = await r.json();
-    const rows = (j.connectors||[]).map(c => `<tr><td>${escapeHtml(c.label)}</td><td>${escapeHtml(c.status)}</td><td>${c.requiresCredential?'yes':'no'}</td><td>${escapeHtml(c.retention||'')}</td></tr>`).join('');
-    $('#connTable tbody').innerHTML = rows;
-    $('#statusDetail').textContent = JSON.stringify(j, null, 2);
-  } catch (e) {
-    $('#statusDetail').textContent = String(e);
-  }
-}
-
-function renderBriefing() {
-  const n = lastResearch?.results?.length || 0;
-  const w = lastResearch?.warnings?.length || 0;
-  $('#briefStats').innerHTML = `
-    <div class="stat"><div class="n">${n}</div><div class="l">Last research hits</div></div>
-    <div class="stat"><div class="n">${w}</div><div class="l">Source warnings</div></div>
-    <div class="stat"><div class="n">${vault.length}</div><div class="l">Local vault notes</div></div>
-    <div class="stat"><div class="n">public</div><div class="l">Ceiling mode</div></div>`;
-}
-
-function renderVault() {
-  $('#vaultList').innerHTML = vault.length
-    ? vault.map((v,i)=>`<li style="margin:8px 0">${escapeHtml(v.t)} <span class="muted">· ${new Date(v.at).toLocaleString()}</span> <button class="ghost" data-i="${i}" style="padding:2px 8px">remove</button></li>`).join('')
-    : '<li>No local notes yet.</li>';
-  $$('#vaultList button').forEach(b => b.onclick = () => { vault.splice(+b.dataset.i,1); localStorage.setItem('veritas_vault', JSON.stringify(vault)); renderVault(); });
-}
-$('#btnVaultAdd').onclick = () => {
-  const t = $('#vaultNote').value.trim(); if (!t) return;
-  vault.unshift({ t, at: Date.now() }); localStorage.setItem('veritas_vault', JSON.stringify(vault));
-  $('#vaultNote').value=''; renderVault();
-};
-
-function renderAnalysis() {
-  if (!lastResearch) { $('#analysisOut').textContent = 'Run a Public Research query first.'; return; }
-  const by = {};
-  for (const r of lastResearch.results) by[r.source] = (by[r.source]||0)+1;
-  const conf = lastResearch.results.map(r=>r.confidence);
-  const avg = conf.length ? Math.round(conf.reduce((a,b)=>a+b,0)/conf.length) : 0;
-  $('#analysisOut').innerHTML = `<div class="muted">Query: <b>${escapeHtml(lastResearch.query)}</b></div>
-    <pre style="white-space:pre-wrap;color:#c5d2de;font-size:12px">${escapeHtml(JSON.stringify({ bySource: by, avgConfidence: avg, connectors: lastResearch.connectorStates }, null, 2))}</pre>`;
-}
-
-$('#btnCopilot').onclick = () => {
-  if (!lastResearch) { $('#copilotOut').textContent = 'No research context. Run a search first.'; return; }
-  const q = $('#copilotIn').value.trim() || 'Summarize leads';
-  const top = lastResearch.results.slice(0,5).map(r => `• [${r.source}] ${r.title} (${r.confidence}%) — ${r.url}`).join('\n');
-  $('#copilotOut').innerHTML = `<div class="muted">Assistive only · based on last public research</div>
-    <pre style="white-space:pre-wrap;font-size:13px;color:#d7e3ee">You asked: ${escapeHtml(q)}\n\nTop public leads:\n${escapeHtml(top)}\n\nNext steps:\n1. Open each source URL and verify context.\n2. Prefer SEC filings / Wikidata for entity identity.\n3. Treat news/GDELT/X as leads, not proof.\n4. Do not request credentials, private systems, or doxxing.</pre>`;
-};
-
-
-// Dual-mode public research: prefer same-origin API, else client-side public sources
 async function clientSideSearch(q) {
   const results = [];
   const warnings = [];
+  const sources = [];
+  // Wikidata
   try {
-    const u = new URL('https://www.wikidata.org/w/api.php');
-    u.searchParams.set('action','wbsearchentities');
-    u.searchParams.set('search', q);
-    u.searchParams.set('language','en');
-    u.searchParams.set('format','json');
-    u.searchParams.set('origin','*');
-    u.searchParams.set('limit','6');
-    const j = await fetch(u).then(r=>r.json());
-    for (const [i,item] of (j.search||[]).entries()) {
-      results.push({ id:'wikidata-'+item.id, source:'Wikidata', title:item.label, summary:item.description||'Wikidata entity', url:'https://www.wikidata.org/wiki/'+item.id, entityType:'unknown', confidence: Math.max(58,94-i*7), provenance:'Wikidata (client)', publicOnly:true });
+    const u = new URL("https://www.wikidata.org/w/api.php");
+    u.searchParams.set("action","wbsearchentities");
+    u.searchParams.set("search", q);
+    u.searchParams.set("language","en");
+    u.searchParams.set("format","json");
+    u.searchParams.set("origin","*");
+    u.searchParams.set("limit","8");
+    const j = await fetch(u).then(r => r.json());
+    for (const [i, item] of (j.search || []).entries()) {
+      results.push({
+        id: "wikidata-" + item.id, source: "Wikidata", title: item.label,
+        summary: item.description || "Wikidata entity",
+        url: "https://www.wikidata.org/wiki/" + item.id,
+        entityType: "entity", confidence: Math.max(55, 94 - i * 5),
+        provenance: "Wikidata (client dual-mode)", publicOnly: true
+      });
     }
-  } catch(e) { warnings.push('Wikidata client unavailable'); }
-  return { query:q, exactQuery:q, searchedAt:new Date().toISOString(), mode:'entity', sources:['Wikidata'], connectorStates:[{id:'wikidata',label:'Wikidata',status: results.length?'ok':'unavailable'}], results, warnings };
+    sources.push("Wikidata");
+  } catch { warnings.push("Wikidata client unavailable"); }
+  // SEC EDGAR company search (public, CORS-open via data.sec.gov sometimes blocked; use full-text search page links)
+  try {
+    const tickerLike = /^[A-Z]{1,5}$/.test(q.trim());
+    results.push({
+      id: "sec-search-" + q.slice(0,24),
+      source: "SEC EDGAR",
+      title: tickerLike ? `SEC EDGAR filings for ticker ${q.toUpperCase()}` : `SEC EDGAR full-text search: ${q}`,
+      summary: "Open the SEC full-text search to review company filings, forms, and exhibits. Public records only.",
+      url: "https://efts.sec.gov/LATEST/search-index?q=%22" + encodeURIComponent(q) + "%22&dateRange=custom&startdt=2010-01-01",
+      entityType: tickerLike ? "ticker" : "organization",
+      confidence: 70,
+      provenance: "SEC EDGAR search (client dual-mode handoff)",
+      publicOnly: true
+    });
+    sources.push("SEC EDGAR");
+  } catch { warnings.push("SEC handoff unavailable"); }
+  // Open Library / Wikipedia snippet
+  try {
+    const wu = "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + encodeURIComponent(q) + "&limit=4&namespace=0&format=json&origin=*";
+    const wj = await fetch(wu).then(r => r.json());
+    const titles = wj[1] || [], descs = wj[2] || [], urls = wj[3] || [];
+    for (let i = 0; i < titles.length; i++) {
+      results.push({
+        id: "wiki-" + i, source: "Wikipedia", title: titles[i],
+        summary: descs[i] || "Wikipedia article", url: urls[i],
+        entityType: "article", confidence: Math.max(50, 80 - i * 6),
+        provenance: "Wikipedia OpenSearch (client dual-mode)", publicOnly: true
+      });
+    }
+    if (titles.length) sources.push("Wikipedia");
+  } catch { warnings.push("Wikipedia client unavailable"); }
+  warnings.push("Running in static dual-mode (no server API). Full multi-connector Veritas API deploys when Vercel/API host is authorized.");
+  return {
+    query: q, exactQuery: q, searchedAt: new Date().toISOString(), mode: "entity",
+    sources, connectorStates: sources.map(s => ({ id: s.toLowerCase(), label: s, status: "ok" })),
+    results, warnings
+  };
 }
 
-const _origRun = runSearch;
-runSearch = async function() {
-  const q = $('#q').value.trim();
+async function runSearch() {
+  const q = $("#q").value.trim();
   if (q.length < 2) return;
-  $('#researchMeta').textContent = 'Searching…';
-  $('#researchGrid').innerHTML = '';
-  $('#researchWarns').innerHTML = '';
+  $("#researchMeta").textContent = "Searching public sources…";
+  $("#researchGrid").innerHTML = "";
+  $("#researchWarns").innerHTML = "";
   try {
-    const r = await fetch('/api/research/search?q=' + encodeURIComponent(q));
-    if (!r.ok) throw new Error('api '+r.status);
+    const r = await fetch("/api/research/search?q=" + encodeURIComponent(q));
+    if (!r.ok) throw new Error("api " + r.status);
     const j = await r.json();
-    if (!j.ok) throw new Error(j.error||'fail');
+    if (!j.ok) throw new Error(j.error || "fail");
     lastResearch = j.data;
   } catch (e) {
     lastResearch = await clientSideSearch(q);
-    lastResearch.warnings = [...(lastResearch.warnings||[]), 'Running in static dual-mode (no server API). Full Veritas API deploys when Vercel project link is authorized.'];
   }
   const d = lastResearch;
-  $('#researchMeta').textContent = `${d.results.length} results for “${d.query}” · ${new Date(d.searchedAt).toLocaleString()}`;
-  $('#researchWarns').innerHTML = (d.warnings||[]).map(w => `<div class="warn">${escapeHtml(w)}</div>`).join('');
-  $('#researchGrid').innerHTML = d.results.map(card).join('') || '<div class="muted">No matches.</div>';
+  $("#researchMeta").textContent = `${d.results.length} results for “${d.query}” · ${new Date(d.searchedAt).toLocaleString()} · sources: ${(d.sources || []).join(", ")}`;
+  $("#researchWarns").innerHTML = (d.warnings || []).map(w => `<div class="warn">${escapeHtml(w)}</div>`).join("");
+  $("#researchGrid").innerHTML = d.results.map(card).join("") || '<div class="muted">No matches.</div>';
   renderAnalysis();
+}
+$("#btnSearch").addEventListener("click", runSearch);
+$("#q").addEventListener("keydown", e => { if (e.key === "Enter") runSearch(); });
+
+/* ========= vault ========= */
+function renderVault() {
+  const items = EVIDENCE.filter(e => vaultFilter === "all" || e.status === vaultFilter);
+  $("#vaultGrid").innerHTML = items.map(e => `
+    <article class="card">
+      <div class="meta">${statusPill(e.status)}<span class="pill">${escapeHtml(e.type)}</span><span class="pill conf">${e.score}</span></div>
+      <h3>${escapeHtml(e.title)}</h3>
+      <div class="summary">${escapeHtml(e.summary)}</div>
+      <div class="meta"><span>${escapeHtml(e.source)}</span><span>${escapeHtml(e.date)}</span><span>${escapeHtml(e.size)}</span></div>
+      <div class="muted" style="font-size:11px">${e.custody.map(c => "· " + escapeHtml(c)).join("<br>")}</div>
+      <div class="meta">${e.tags.map(t => `<span class="pill">${escapeHtml(t)}</span>`).join("")}</div>
+    </article>`).join("") || '<div class="muted">No evidence in this filter.</div>';
+  $("#vaultList").innerHTML = vaultNotes.length
+    ? vaultNotes.map((v,i) => `<li style="margin:8px 0">${escapeHtml(v.t)} <span class="muted">· ${new Date(v.at).toLocaleString()}</span>
+        <button class="ghost" data-i="${i}" style="padding:2px 8px">remove</button></li>`).join("")
+    : "<li>No local notes yet.</li>";
+  $$("#vaultList button").forEach(b => b.onclick = () => {
+    vaultNotes.splice(+b.dataset.i, 1);
+    localStorage.setItem("veritas_vault", JSON.stringify(vaultNotes));
+    renderVault();
+  });
+}
+$$("[data-vfilter]").forEach(b => b.onclick = () => { vaultFilter = b.dataset.vfilter; renderVault(); });
+$("#btnVaultAdd").onclick = () => {
+  const t = $("#vaultNote").value.trim(); if (!t) return;
+  vaultNotes.unshift({ t, at: Date.now() });
+  localStorage.setItem("veritas_vault", JSON.stringify(vaultNotes));
+  $("#vaultNote").value = "";
+  renderVault();
+  toast("Local vault note saved");
 };
 
+/* ========= analysis ========= */
+function renderAnalysis() {
+  $("#insightGrid").innerHTML = INSIGHTS.map(i => `
+    <article class="card">
+      <div class="meta"><span class="pill ${tonePill(i.tone)}">${escapeHtml(i.signal)}</span><span class="pill conf">${i.confidence}%</span></div>
+      <h3>${escapeHtml(i.title)}</h3>
+      <div class="summary">${escapeHtml(i.detail)}</div>
+      <div class="bar"><i style="width:${i.confidence}%;background:${i.tone==='cyan'?'var(--accent)':i.tone==='violet'?'var(--violet)':i.tone==='red'?'var(--danger)':'var(--amber)'}"></i></div>
+    </article>`).join("");
+  if (!lastResearch) { $("#analysisOut").textContent = "Run a Public Research query first."; return; }
+  const by = {};
+  for (const r of lastResearch.results) by[r.source] = (by[r.source] || 0) + 1;
+  const conf = lastResearch.results.map(r => r.confidence);
+  const avg = conf.length ? Math.round(conf.reduce((a,b)=>a+b,0)/conf.length) : 0;
+  $("#analysisOut").innerHTML = `<div class="muted">Query: <b>${escapeHtml(lastResearch.query)}</b></div>
+    <pre style="white-space:pre-wrap;color:#c5d2de;font-size:12px;margin:8px 0 0">${escapeHtml(JSON.stringify({ bySource: by, avgConfidence: avg, connectors: lastResearch.connectorStates, mode: lastResearch.mode }, null, 2))}</pre>`;
+}
+
+/* ========= briefing ========= */
+function renderBriefing() {
+  const n = lastResearch?.results?.length || 0;
+  const w = lastResearch?.warnings?.length || 0;
+  $("#briefStats").innerHTML = `
+    <div class="stat"><div class="n">${n}</div><div class="l">Last research hits</div></div>
+    <div class="stat"><div class="n">${w}</div><div class="l">Source warnings</div></div>
+    <div class="stat"><div class="n">${EVIDENCE.filter(e=>e.status==="restricted").length}</div><div class="l">Ethical holds</div></div>
+    <div class="stat"><div class="n">public</div><div class="l">Ceiling mode</div></div>`;
+  $("#briefList").innerHTML = INSIGHTS.map(i =>
+    `<div class="feed-row"><div class="feed-ico" style="color:var(--accent);border-color:rgba(53,224,208,.4);background:rgba(53,224,208,.1)">●</div>
+     <div><div style="font-weight:800;font-size:13px">${escapeHtml(i.title)}</div>
+     <div class="muted" style="font-size:12px">${escapeHtml(i.detail)}</div></div>
+     <span class="pill conf">${i.confidence}%</span></div>`).join("");
+}
+
+/* ========= team ========= */
+function renderTeam() {
+  $("#teamGrid").innerHTML = TASKS.map(t => `
+    <article class="card">
+      <div class="meta"><span class="pill ${t.status==="In review"?"amber":t.status==="Active"?"source":"violet"}">${escapeHtml(t.status)}</span><span>${escapeHtml(t.owner)}</span></div>
+      <h3>${escapeHtml(t.title)}</h3>
+      <div class="bar"><i style="width:${Math.round(t.progress*100)}%;background:var(--accent)"></i></div>
+      <div class="meta">${Math.round(t.progress*100)}% complete</div>
+    </article>`).join("");
+  $("#auditList").innerHTML = AUDIT.map(a =>
+    `<div class="feed-row"><div class="feed-ico" style="color:var(--${a.tone==="cyan"?"accent":a.tone==="violet"?"violet":"amber"});border-color:currentColor;opacity:.9">✎</div>
+     <div style="flex:1"><div style="font-weight:700;font-size:13px">${escapeHtml(a.actor)}</div>
+     <div class="muted">${escapeHtml(a.action)}</div></div><div class="muted" style="font-size:11px">${escapeHtml(a.timestamp)}</div></div>`).join("");
+}
+
+/* ========= copilot ========= */
+function renderCopilotChips() {
+  $("#copilotChips").innerHTML = COPILOT_CHIPS.map(c =>
+    `<button class="chip" data-chip="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join("");
+  $$("[data-chip]").forEach(b => b.onclick = () => { $("#copilotIn").value = b.dataset.chip; $("#btnCopilot").click(); });
+}
+$("#btnCopilot").onclick = () => {
+  const q = $("#copilotIn").value.trim() || "Summarize leads";
+  const verified = EVIDENCE.filter(e => e.status === "verified");
+  const holds = EVIDENCE.filter(e => e.status === "restricted");
+  const top = (lastResearch?.results || []).slice(0,5).map(r => `• [${r.source}] ${r.title} (${r.confidence}%) — ${r.url}`).join("\n");
+  const body = `You asked: ${q}
+
+Northstar strongest verified signals:
+${verified.slice(0,3).map(e => `• ${e.title} (${e.score}%) — ${e.summary}`).join("\n")}
+
+Human review required:
+${holds.map(e => `• ${e.title} — ${e.summary}`).join("\n") || "• none"}
+
+${top ? "Top public research leads:\n" + top : "No public research context yet — run Public Research first."}
+
+Guardrails:
+1. Open each source URL and verify context.
+2. Prefer SEC filings / Wikidata for entity identity.
+3. Treat news/GDELT/X as leads, not proof.
+4. Do not request credentials, private systems, or doxxing.
+5. Keep restricted items quarantined until consent is documented.`;
+  $("#copilotOut").innerHTML = `<div class="meta"><span class="pill violet">ASSISTIVE</span><span class="pill conf">context grounded</span></div>
+    <pre style="white-space:pre-wrap;font-size:13px;color:#d7e3ee;margin:10px 0 0">${escapeHtml(body)}</pre>`;
+};
+
+/* ========= status ========= */
+async function loadCapabilities() {
+  $("#statusStats").innerHTML = `
+    <div class="stat"><div class="n" id="stApi">…</div><div class="l">API health</div></div>
+    <div class="stat"><div class="n">${EVIDENCE.length}</div><div class="l">Fixture evidence</div></div>
+    <div class="stat"><div class="n">${INSIGHTS.length}</div><div class="l">Pattern insights</div></div>
+    <div class="stat"><div class="n">public</div><div class="l">Safety ceiling</div></div>`;
+  try {
+    const r = await fetch("/api/research/capabilities");
+    const j = await r.json();
+    const rows = (j.connectors || []).map(c =>
+      `<tr><td>${escapeHtml(c.label || c.id)}</td><td>${escapeHtml(c.status)}</td><td>${c.requiresCredential ? "yes" : "no"}</td><td>${escapeHtml(c.retention || "")}</td></tr>`
+    ).join("");
+    $("#connTable tbody").innerHTML = rows || "<tr><td colspan=4 class=muted>No connectors reported</td></tr>";
+    $("#statusDetail").textContent = JSON.stringify(j, null, 2);
+    $("#stApi").textContent = "online";
+    $("#stApi").style.color = "var(--ok)";
+  } catch (e) {
+    $("#connTable tbody").innerHTML = `
+      <tr><td>Wikidata</td><td>client dual-mode</td><td>no</td><td>ephemeral</td></tr>
+      <tr><td>Wikipedia</td><td>client dual-mode</td><td>no</td><td>ephemeral</td></tr>
+      <tr><td>SEC EDGAR</td><td>client handoff</td><td>no</td><td>ephemeral</td></tr>
+      <tr><td>GDELT / X</td><td>server only</td><td>optional</td><td>—</td></tr>`;
+    $("#statusDetail").textContent = "Static dual-mode: API offline. Frontend fully operational with client public sources.\n" + String(e);
+    $("#stApi").textContent = "offline";
+    $("#stApi").style.color = "var(--amber)";
+  }
+}
+
+/* boot */
+renderDesk();
 checkHealth();
-runSearch();
 setInterval(checkHealth, 30000);
+// deep-link ?view=
+const params = new URLSearchParams(location.search);
+if (params.get("view") && titles[params.get("view")]) setView(params.get("view"));
+if (params.get("q")) { $("#q").value = params.get("q"); setView("research"); runSearch(); }
 </script>
 </body>
 </html>
