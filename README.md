@@ -2,6 +2,14 @@
 
 Veritas is a mobile-first investigative journalism workspace built on the managed Expo Router / React Native / TypeScript starter. The current package combines local deterministic fixtures for the Northstar Ledger case with a live, source-cited public research route for names, organizations, tickers, and domains. It includes governed connector metadata, safe public-record query templates, historical-index discovery, an optional server-only Firecrawl acquisition seam, the briefing dashboard, Evidence Vault, Ethical Source Checker presentation, Pattern Finder, Collaboration Hub, Investigative Copilot, and public research.
 
+## Live production frontend
+
+- **SPA (GitHub Pages):** https://cantgetalonggta-png.github.io/veritas-investigative-intelligence/
+- **Repository:** https://github.com/cantgetalonggta-png/veritas-investigative-intelligence
+- Dual-mode: prefers same-origin `/api/research/*`; falls back to client Wikidata + Wikipedia + SEC EDGAR handoff on static hosts.
+- Field Desk, Public Research, Briefing, Evidence Vault, Pattern Finder, Collaboration, Copilot, System Status.
+- See [`DEPLOY_STATUS.md`](DEPLOY_STATUS.md) for packaging, smoke results, and the single Vercel permission step.
+
 ## Run it
 
 ```bash
