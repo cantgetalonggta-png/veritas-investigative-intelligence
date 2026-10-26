@@ -7,6 +7,7 @@ export const RESEARCH_CONNECTORS: ConnectorDescriptor[] = [
   { id: "gleif", label: "GLEIF LEI", source: "GLEIF LEI", capabilities: ["entity-search", "lei-lookup"], requiresCredential: false, retention: "source-linked" },
   { id: "opensanctions", label: "OpenSanctions", source: "OpenSanctions", capabilities: ["sanctions-screen", "entity-search"], requiresCredential: false, retention: "source-linked" },
   { id: "usaspending", label: "USAspending", source: "USAspending", capabilities: ["federal-spend", "records"], requiresCredential: false, retention: "source-linked" },
+  { id: "public-directory", label: "Public Phone & 411 Directories", source: "Public Directory", capabilities: ["directory-search", "entity-search"], requiresCredential: false, retention: "source-linked" },
   { id: "business-registry", label: "Business Registry Handoffs", source: "Business Registry", capabilities: ["business-registry", "entity-search"], requiresCredential: false, retention: "source-linked" },
   { id: "gdelt", label: "GDELT News", source: "GDELT News", capabilities: ["news-search"], requiresCredential: false, retention: "source-linked" },
   { id: "x-public-posts", label: "X Public Posts", source: "X Public Posts", capabilities: ["public-posts"], requiresCredential: true, retention: "metadata-only" },

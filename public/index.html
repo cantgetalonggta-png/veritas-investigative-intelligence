@@ -469,7 +469,32 @@ async function clientSideSearch(q) {
     warnings.push('Business-directory / 411-style intent: public business registries & LEI only — private reverse-phone / personal white-pages are blocked by policy.');
   }
   warnings.push('Live dual-mode: browser calls public CORS APIs directly. Full multi-connector server API attaches when Vercel project permission is granted.');
-  return {
+  
+  // Public phone book / 411 / reverse-directory handoffs (journalistic first pass)
+  const phones = (q.match(/(?:\+?\d{1,3}[\s.-]?)?(?:\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}\b|\b\d{10,15}\b/g)||[]).map(m=>m.replace(/[^\d+]/g,''));
+  const phone = phones[0];
+  const qq = encodeURIComponent(q);
+  const pq = encodeURIComponent(phone||q);
+  results.push(
+    { id:'dir-wp', source:'Public Directory', title: phone?('Whitepages reverse: '+phone):('Whitepages: '+q), summary:'Published white-pages / public listings — standard desk 411 workflow.', url: phone?('https://www.whitepages.com/phone/'+pq):('https://www.whitepages.com/name/'+qq), entityType:'unknown', confidence:70, provenance:'Whitepages handoff', publicOnly:true },
+    { id:'dir-yp', source:'Public Directory', title:'Yellow Pages: '+q, summary:'Public yellow-pages business listings (phones/addresses as published).', url:'https://www.yellowpages.com/search?search_terms='+qq, entityType:'organization', confidence:72, provenance:'Yellow Pages handoff', publicOnly:true },
+    { id:'dir-411', source:'Public Directory', title: phone?('411 reverse: '+phone):('411 directory: '+q), summary:'Directory-assistance style public reverse/name search.', url: phone?('https://www.411.com/reverse-phone/'+pq):('https://www.411.com/name/'+qq), entityType:'unknown', confidence:68, provenance:'411.com handoff', publicOnly:true },
+    { id:'dir-anywho', source:'Public Directory', title: phone?('AnyWho reverse: '+phone):('AnyWho: '+q), summary:'Public reverse-phone / name directory handoff.', url: phone?('https://www.anywho.com/reverse-phone-lookup/'+pq):('https://www.anywho.com/people/'+qq), entityType:'unknown', confidence:65, provenance:'AnyWho handoff', publicOnly:true },
+    { id:'dir-tps', source:'Public Directory', title: phone?('Public records phone search: '+phone):('Public records people search: '+q), summary:'Public-records people/phone aggregator used at news desks — verify every field.', url: phone?('https://www.truepeoplesearch.com/results?phoneno='+pq):('https://www.truepeoplesearch.com/results?name='+qq), entityType:'person', confidence:63, provenance:'TruePeopleSearch handoff', publicOnly:true }
+  );
+  sources.add('Public Directory');
+  try {
+    const osm = await fetchJsonClient('https://nominatim.openstreetmap.org/search?q='+qq+'&format=json&addressdetails=1&extratags=1&limit=5');
+    for (const [i,item] of (osm||[]).entries()) {
+      const phoneListed = (item.extratags&& (item.extratags.phone||item.extratags['contact:phone']))||'';
+      results.push({ id:'osm-'+item.osm_id, source:'Public Directory', title:(item.display_name||'').split(',')[0], summary:'OSM public listing'+(phoneListed?(' · listed phone '+phoneListed):''), url: item.extratags&&item.extratags.website || ('https://www.openstreetmap.org/'+(item.osm_type||'search')+'/'+(item.osm_id||'')), entityType:'organization', confidence: phoneListed?88-i*3:78-i*3, provenance:'OpenStreetMap Nominatim (live)', publicOnly:true });
+    }
+  } catch(e) {}
+  if (/411|white\s*pages|yellow\s*pages|phone\s*book|reverse\s*phone|directory|skip\s*trace/i.test(q) || phone) {
+    warnings.push('Public directory / 411 / reverse-listing mode: published listings and public-record people search handoffs. Leads only — verify primary sources.');
+  }
+
+return {
     query:q, exactQuery:q, searchedAt:new Date().toISOString(), mode:/411|directory|business/i.test(q)?'business':'entity',
     sources:[...sources], connectorStates, results, warnings
   };
@@ -479,9 +504,9 @@ async function clientSideSearch(q) {
 runSearch = async function() {
   const q = $('#q').value.trim();
   if (q.length < 2) return;
-  if (/(?:reverse\s*(?:phone|lookup)|phone\s*owner|unlisted\s*number|skip\s*trace|social security|ssn\b)/i.test(q)) {
+  if (/(?:social security number|\bssn\b|credit\s*card|\bcvv\b|password|api[_ -]?key)/i.test(q)) {
     $('#researchMeta').textContent = 'Blocked by policy';
-    $('#researchWarns').innerHTML = '<div class="warn">Private reverse-phone / non-public PII targeting is blocked. Search legal business names, tickers, LEI, or public entities.</div>';
+    $('#researchWarns').innerHTML = '<div class="warn">Credential / SSN / financial-account targeting is blocked. Public phone book, 411, and reverse-directory research is allowed.</div>';
     return;
   }
   $('#researchMeta').textContent = 'Searching public sources…';

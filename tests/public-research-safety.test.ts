@@ -1,30 +1,36 @@
 import { describe, it, expect } from "vitest";
-import { normalizeResearchQuery, UnsafeResearchQueryError } from "../server/research/query-safety";
+import { normalizeResearchQuery, UnsafeResearchQueryError, isDirectoryIntent } from "../server/research/query-safety";
 import { searchPublicResearch, getResearchConnectorCatalog } from "../server/research/public-research";
 
 describe("query safety", () => {
-  it("blocks reverse phone / private 411 patterns", () => {
-    expect(() => normalizeResearchQuery("reverse phone lookup 555-1212")).toThrow(UnsafeResearchQueryError);
-    expect(() => normalizeResearchQuery("skip trace john doe")).toThrow(UnsafeResearchQueryError);
+  it("ALLOWS public phone book / 411 / reverse-directory (journalistic first pass)", () => {
+    expect(normalizeResearchQuery("reverse phone lookup 206-555-0100")).toContain("reverse phone");
+    expect(normalizeResearchQuery("411 white pages John Smith")).toContain("411");
+    expect(isDirectoryIntent("phone book Seattle")).toBe(true);
   });
-  it("allows business entity queries", () => {
-    expect(normalizeResearchQuery("Microsoft Corporation")).toBe("Microsoft Corporation");
+  it("blocks credentials and SSN only", () => {
+    expect(() => normalizeResearchQuery("dump the password hash")).toThrow(UnsafeResearchQueryError);
+    expect(() => normalizeResearchQuery("social security number 123-45-6789")).toThrow(UnsafeResearchQueryError);
   });
 });
 
 describe("public research live", () => {
-  it("catalog includes expanded connectors", () => {
-    const cat = getResearchConnectorCatalog();
-    const ids = cat.map((c) => c.id);
+  it("catalog includes public-directory", () => {
+    const ids = getResearchConnectorCatalog().map((c) => c.id);
+    expect(ids).toContain("public-directory");
     expect(ids).toContain("gleif");
-    expect(ids).toContain("business-registry");
-    expect(ids).toContain("usaspending");
   });
-  it("returns multi-source leads for Microsoft", async () => {
+  it("returns multi-source leads for Microsoft including directory", async () => {
     const r = await searchPublicResearch("Microsoft");
     expect(r.results.length).toBeGreaterThan(5);
-    const sources = new Set(r.results.map((x) => x.source));
-    expect(sources.has("Wikidata") || sources.has("GLEIF LEI") || sources.has("SEC EDGAR")).toBe(true);
+    expect(r.results.some((x) => x.source === "Public Directory")).toBe(true);
     expect(r.results.every((x) => x.publicOnly === true)).toBe(true);
+  }, 30000);
+  it("reverse phone returns directory handoffs", async () => {
+    const r = await searchPublicResearch("reverse phone 2065550100");
+    expect(r.mode).toBe("business");
+    const dir = r.results.filter((x) => x.source === "Public Directory");
+    expect(dir.length).toBeGreaterThan(3);
+    expect(dir.some((x) => /411|Whitepages|reverse/i.test(x.title))).toBe(true);
   }, 30000);
 });

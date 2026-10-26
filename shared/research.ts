@@ -8,7 +8,8 @@ export type ResearchSource =
   | "OpenSanctions"
   | "USAspending"
   | "Business Registry"
-  | "Wikipedia";
+  | "Wikipedia"
+  | "Public Directory";
 
 export type ResearchEntityType = "person" | "organization" | "unknown";
 export type ConnectorStatus =
@@ -35,6 +36,7 @@ export type ConnectorDescriptor = {
     | "lei-lookup"
     | "federal-spend"
     | "business-registry"
+    | "directory-search"
   )[];
   requiresCredential: boolean;
   retention: "metadata-only" | "source-linked" | "user-authorized-acquisition";

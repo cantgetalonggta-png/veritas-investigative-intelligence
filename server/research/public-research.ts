@@ -1,7 +1,8 @@
 import type { ResearchResponse, ResearchResult, ResearchSource } from "../../shared/research";
 import { callDataApi } from "../_core/dataApi";
 import { connectorState, connectorCatalog } from "./registry";
-import { normalizeResearchQuery, isBusinessDirectoryIntent } from "./query-safety";
+import { normalizeResearchQuery, isBusinessDirectoryIntent, isDirectoryIntent } from "./query-safety";
+import { searchPublicDirectory } from "./public-directory";
 
 const cache = new Map<string, { expiresAt: number; value: ResearchResponse }>();
 const CACHE_MS = 60_000;
@@ -380,6 +381,7 @@ async function searchManagedX(query: string): Promise<ResearchResult[]> {
 }
 
 type SettledName =
+  | "Public Directory"
   | "Wikidata"
   | "Wikipedia"
   | "SEC EDGAR"
@@ -396,6 +398,7 @@ export async function searchPublicResearch(rawQuery: string): Promise<ResearchRe
   if (cached && cached.expiresAt > Date.now()) return cached.value;
 
   const jobs: { name: SettledName; connectorId: string; run: () => Promise<ResearchResult[]> }[] = [
+    { name: "Public Directory", connectorId: "public-directory", run: () => searchPublicDirectory(query) },
     { name: "Wikidata", connectorId: "wikidata", run: () => searchWikidata(query) },
     { name: "Wikipedia", connectorId: "wikipedia", run: () => searchWikipedia(query) },
     { name: "SEC EDGAR", connectorId: "sec-edgar", run: () => searchSec(query) },
@@ -441,9 +444,9 @@ export async function searchPublicResearch(rawQuery: string): Promise<ResearchRe
     else connectorStates.push(connectorState("business-registry", "ok"));
   }
 
-  if (isBusinessDirectoryIntent(query)) {
+  if (isDirectoryIntent(query) || isBusinessDirectoryIntent(query)) {
     warnings.push(
-      "Business-directory / 411-style intent detected: Veritas resolves public business registries, LEI, SAM.gov, and filings — not private reverse-phone or personal white-pages data.",
+      "Directory / 411 / reverse-listing intent: results include public phone-book, yellow pages, reverse-directory handoffs and OSM-listed contacts. Treat as leads; verify primary listings.",
     );
   }
 
@@ -452,7 +455,7 @@ export async function searchPublicResearch(rawQuery: string): Promise<ResearchRe
     query,
     exactQuery: query,
     searchedAt: new Date().toISOString(),
-    mode: isBusinessDirectoryIntent(query) ? "business" : "entity",
+    mode: isDirectoryIntent(query) || isBusinessDirectoryIntent(query) ? "business" : "entity",
     sources,
     connectorStates,
     results,

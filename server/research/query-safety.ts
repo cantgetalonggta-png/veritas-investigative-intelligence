@@ -1,22 +1,32 @@
 import type { SafeQueryTemplate } from "../../shared/research";
 
-/** Credential / private-access / non-public PII targeting — hard block. */
+/**
+ * Veritas is an investigative journalism workspace.
+ * Published phone books, 411 listings, white/yellow pages, and reverse lookups
+ * against PUBLICLY LISTED numbers are standard first-pass OSINT — not doxxing.
+ *
+ * Hard block only: credentials/secrets, financial account numbers, SSN, and
+ * explicit violent/harassment targeting. Do NOT block directory/411/reverse-phone
+ * language or public address discovery for news reporting.
+ */
 const BLOCKED_PATTERNS = [
   /(?:password|passcode|secret|api[_ -]?key|private[_ -]?key|bearer token)/i,
-  /(?:credential|login|admin|wp-config|\.env|backup dump|database dump)/i,
-  /(?:session cookie|access token|ssh key|wallet seed|social security|ssn\b|itin\b)/i,
-  /(?:credit\s*card|cvv|bank\s*account|routing\s*number|iban\b)/i,
-  /(?:doxx?|swat|stalk|harass)/i,
-  // Private phone / reverse-directory / non-public 411 style targeting
-  /(?:reverse\s*(?:phone|lookup|directory)|phone\s*owner|who\s*owns\s*(?:this\s*)?(?:number|phone))/i,
-  /(?:caller\s*id\s*lookup|cell\s*phone\s*lookup|unlisted\s*number)/i,
-  /(?:people\s*search\s*(?:for\s*)?(?:ssn|dob|address)|skip\s*trace)/i,
-  /(?:home\s*address\s*(?:of|for)\s+\w+|private\s*residence\s*of)/i,
+  /(?:credential|login|wp-config|\.env|backup dump|database dump)/i,
+  /(?:session cookie|access token|ssh key|wallet seed)/i,
+  /(?:social security number|\bssn\b|\bitin\b)/i,
+  /(?:credit\s*card|cvv|bank\s*account|routing\s*number|\biban\b)/i,
+  // Explicit harm targeting — not directory research
+  /(?:\bswat\b|\bswatting\b|bomb\s*threat)/i,
+  /(?:how\s+to\s+(?:stalk|harass|doxx?)\b)/i,
 ];
 
-/** Soft guidance: business-directory intent is OK as public entity search, not private reverse-411. */
-const BUSINESS_DIRECTORY_HINT =
-  /(?:411|white\s*pages|yellow\s*pages|phone\s*book|directory|business\s*(?:listing|directory)|chamber\s*of\s*commerce)/i;
+/** Directory / 411 / phone book / reverse-lookup intent (ALLOWED — journalistic). */
+const DIRECTORY_INTENT =
+  /(?:411|white\s*pages|yellow\s*pages|phone\s*book|telephone\s*directory|reverse\s*(?:phone|lookup|directory)|caller\s*id|directory\s*assistance|business\s*(?:listing|directory)|chamber\s*of\s*commerce|phone\s*(?:number|listing)|who\s*(?:owns|has|is)\s*(?:this\s*)?(?:number|phone)|skip\s*trace)/i;
+
+/** Rough NANP / intl phone fragment in the query */
+const PHONE_FRAGMENT =
+  /(?:\+?\d{1,3}[\s.-]?)?(?:\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}\b|\b\d{10,15}\b/;
 
 export class UnsafeResearchQueryError extends Error {
   code = "BLOCKED_RESEARCH_QUERY" as const;
@@ -27,14 +37,23 @@ export function normalizeResearchQuery(rawQuery: string): string {
   if (query.length < 2) throw new Error("Search query must contain at least 2 characters.");
   if (BLOCKED_PATTERNS.some((pattern) => pattern.test(query))) {
     throw new UnsafeResearchQueryError(
-      "Blocked: this pattern targets credentials, private contact reverse-lookup, or non-public PII. Veritas only searches public-record / public-business sources.",
+      "Blocked: credential/secret theft, SSN/financial account targeting, or explicit harm instructions are outside Veritas public-record research.",
     );
   }
   return query;
 }
 
 export function isBusinessDirectoryIntent(query: string): boolean {
-  return BUSINESS_DIRECTORY_HINT.test(query);
+  return DIRECTORY_INTENT.test(query) || PHONE_FRAGMENT.test(query);
+}
+
+export function isDirectoryIntent(query: string): boolean {
+  return isBusinessDirectoryIntent(query);
+}
+
+export function extractPhoneCandidates(query: string): string[] {
+  const matches = query.match(/(?:\+?\d{1,3}[\s.-]?)?(?:\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}\b|\b\d{10,15}\b/g) || [];
+  return [...new Set(matches.map((m) => m.replace(/[^\d+]/g, "")).filter((m) => m.replace(/\D/g, "").length >= 10))];
 }
 
 export function normalizePublicDomain(rawDomain: string): string {
@@ -54,28 +73,34 @@ export function buildSafeSearchTemplates(subject: string, domains: string[] = []
   const scope = scopedDomain ? `site:${scopedDomain} ` : "";
   return [
     {
+      label: "Public phone / directory listings",
+      providerSyntax: "web",
+      query: `${scope}"${normalizedSubject}" ("phone" OR "telephone" OR "411" OR "white pages" OR "yellow pages" OR directory)`,
+      safetyNote: "Published directory & business listing discovery — standard journalistic first pass.",
+    },
+    {
       label: "Public documents",
       providerSyntax: "web",
       query: `${scope}"${normalizedSubject}" filetype:pdf`,
-      safetyNote: "Finds public documents; does not target accounts, credentials, or private systems.",
+      safetyNote: "Public documents; verify original source before citing.",
     },
     {
       label: "Contracts and filings",
       providerSyntax: "records",
       query: `${scope}"${normalizedSubject}" (contract OR filing OR report OR LEI OR "business registration")`,
-      safetyNote: "Public filings and registry language only — verify original sources.",
+      safetyNote: "Public filings and registry language.",
     },
     {
       label: "Business registry language",
       providerSyntax: "records",
       query: `"${normalizedSubject}" ("articles of incorporation" OR "business license" OR "registered agent" OR "secretary of state")`,
-      safetyNote: "Discovery terms for public business registries — not private phone books.",
+      safetyNote: "Public business registries and SoS portals.",
     },
     {
       label: "Meetings and hearings",
       providerSyntax: "domain",
       query: `${scope}"${normalizedSubject}" (meeting minutes OR hearing OR agenda OR FOIA)`,
-      safetyNote: "Public-record discovery terms; verify the original source before citing.",
+      safetyNote: "Public-record discovery terms.",
     },
   ];
 }
