@@ -285,6 +285,51 @@ $('#btnCopilot').onclick = () => {
     <pre style="white-space:pre-wrap;font-size:13px;color:#d7e3ee">You asked: ${escapeHtml(q)}\n\nTop public leads:\n${escapeHtml(top)}\n\nNext steps:\n1. Open each source URL and verify context.\n2. Prefer SEC filings / Wikidata for entity identity.\n3. Treat news/GDELT/X as leads, not proof.\n4. Do not request credentials, private systems, or doxxing.</pre>`;
 };
 
+
+// Dual-mode public research: prefer same-origin API, else client-side public sources
+async function clientSideSearch(q) {
+  const results = [];
+  const warnings = [];
+  try {
+    const u = new URL('https://www.wikidata.org/w/api.php');
+    u.searchParams.set('action','wbsearchentities');
+    u.searchParams.set('search', q);
+    u.searchParams.set('language','en');
+    u.searchParams.set('format','json');
+    u.searchParams.set('origin','*');
+    u.searchParams.set('limit','6');
+    const j = await fetch(u).then(r=>r.json());
+    for (const [i,item] of (j.search||[]).entries()) {
+      results.push({ id:'wikidata-'+item.id, source:'Wikidata', title:item.label, summary:item.description||'Wikidata entity', url:'https://www.wikidata.org/wiki/'+item.id, entityType:'unknown', confidence: Math.max(58,94-i*7), provenance:'Wikidata (client)', publicOnly:true });
+    }
+  } catch(e) { warnings.push('Wikidata client unavailable'); }
+  return { query:q, exactQuery:q, searchedAt:new Date().toISOString(), mode:'entity', sources:['Wikidata'], connectorStates:[{id:'wikidata',label:'Wikidata',status: results.length?'ok':'unavailable'}], results, warnings };
+}
+
+const _origRun = runSearch;
+runSearch = async function() {
+  const q = $('#q').value.trim();
+  if (q.length < 2) return;
+  $('#researchMeta').textContent = 'Searching…';
+  $('#researchGrid').innerHTML = '';
+  $('#researchWarns').innerHTML = '';
+  try {
+    const r = await fetch('/api/research/search?q=' + encodeURIComponent(q));
+    if (!r.ok) throw new Error('api '+r.status);
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error||'fail');
+    lastResearch = j.data;
+  } catch (e) {
+    lastResearch = await clientSideSearch(q);
+    lastResearch.warnings = [...(lastResearch.warnings||[]), 'Running in static dual-mode (no server API). Full Veritas API deploys when Vercel project link is authorized.'];
+  }
+  const d = lastResearch;
+  $('#researchMeta').textContent = `${d.results.length} results for “${d.query}” · ${new Date(d.searchedAt).toLocaleString()}`;
+  $('#researchWarns').innerHTML = (d.warnings||[]).map(w => `<div class="warn">${escapeHtml(w)}</div>`).join('');
+  $('#researchGrid').innerHTML = d.results.map(card).join('') || '<div class="muted">No matches.</div>';
+  renderAnalysis();
+};
+
 checkHealth();
 runSearch();
 setInterval(checkHealth, 30000);
