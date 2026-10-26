@@ -395,237 +395,114 @@ function card(item) {
   </article>`;
 }
 
+// Dual-mode: prefer same-origin API, else LIVE public CORS sources (no sandbox)
+async function fetchJsonClient(url, init) {
+  const r = await fetch(url, init);
+  if (!r.ok) throw new Error(String(r.status));
+  return r.json();
+}
+function mapCard(item) {
+  return item;
+}
 async function clientSideSearch(q) {
   const results = [];
   const warnings = [];
-  const sources = [];
-  // Wikidata
-  try {
-    const u = new URL("https://www.wikidata.org/w/api.php");
-    u.searchParams.set("action","wbsearchentities");
-    u.searchParams.set("search", q);
-    u.searchParams.set("language","en");
-    u.searchParams.set("format","json");
-    u.searchParams.set("origin","*");
-    u.searchParams.set("limit","8");
-    const j = await fetch(u).then(r => r.json());
-    for (const [i, item] of (j.search || []).entries()) {
-      results.push({
-        id: "wikidata-" + item.id, source: "Wikidata", title: item.label,
-        summary: item.description || "Wikidata entity",
-        url: "https://www.wikidata.org/wiki/" + item.id,
-        entityType: "entity", confidence: Math.max(55, 94 - i * 5),
-        provenance: "Wikidata (client dual-mode)", publicOnly: true
-      });
+  const connectorStates = [];
+  const sources = new Set();
+  async function run(id, label, source, fn) {
+    try {
+      const rows = await fn();
+      results.push(...rows);
+      if (rows.length) sources.add(source);
+      connectorStates.push({ id, label, source, status: rows.length ? 'ok' : 'partial', requiresCredential: false, retention: 'source-linked' });
+    } catch (e) {
+      warnings.push(label + ' unavailable');
+      connectorStates.push({ id, label, source, status: 'unavailable', requiresCredential: false, retention: 'source-linked' });
     }
-    sources.push("Wikidata");
-  } catch { warnings.push("Wikidata client unavailable"); }
-  // SEC EDGAR company search (public, CORS-open via data.sec.gov sometimes blocked; use full-text search page links)
-  try {
-    const tickerLike = /^[A-Z]{1,5}$/.test(q.trim());
-    results.push({
-      id: "sec-search-" + q.slice(0,24),
-      source: "SEC EDGAR",
-      title: tickerLike ? `SEC EDGAR filings for ticker ${q.toUpperCase()}` : `SEC EDGAR full-text search: ${q}`,
-      summary: "Open the SEC full-text search to review company filings, forms, and exhibits. Public records only.",
-      url: "https://efts.sec.gov/LATEST/search-index?q=%22" + encodeURIComponent(q) + "%22&dateRange=custom&startdt=2010-01-01",
-      entityType: tickerLike ? "ticker" : "organization",
-      confidence: 70,
-      provenance: "SEC EDGAR search (client dual-mode handoff)",
-      publicOnly: true
-    });
-    sources.push("SEC EDGAR");
-  } catch { warnings.push("SEC handoff unavailable"); }
-  // Open Library / Wikipedia snippet
-  try {
-    const wu = "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + encodeURIComponent(q) + "&limit=4&namespace=0&format=json&origin=*";
-    const wj = await fetch(wu).then(r => r.json());
-    const titles = wj[1] || [], descs = wj[2] || [], urls = wj[3] || [];
-    for (let i = 0; i < titles.length; i++) {
-      results.push({
-        id: "wiki-" + i, source: "Wikipedia", title: titles[i],
-        summary: descs[i] || "Wikipedia article", url: urls[i],
-        entityType: "article", confidence: Math.max(50, 80 - i * 6),
-        provenance: "Wikipedia OpenSearch (client dual-mode)", publicOnly: true
+  }
+  await Promise.all([
+    run('wikidata', 'Wikidata', 'Wikidata', async () => {
+      const u = new URL('https://www.wikidata.org/w/api.php');
+      u.searchParams.set('action','wbsearchentities'); u.searchParams.set('search', q);
+      u.searchParams.set('language','en'); u.searchParams.set('format','json'); u.searchParams.set('origin','*'); u.searchParams.set('limit','6');
+      const j = await fetchJsonClient(u);
+      return (j.search||[]).map((item,i)=>({ id:'wikidata-'+item.id, source:'Wikidata', title:item.label, summary:item.description||'Wikidata entity', url:'https://www.wikidata.org/wiki/'+item.id, entityType:'unknown', confidence: Math.max(58,94-i*7), provenance:'Wikidata (live client)', publicOnly:true }));
+    }),
+    run('wikipedia', 'Wikipedia', 'Wikipedia', async () => {
+      const u = new URL('https://en.wikipedia.org/w/api.php');
+      u.searchParams.set('action','query'); u.searchParams.set('list','search'); u.searchParams.set('srsearch', q);
+      u.searchParams.set('format','json'); u.searchParams.set('origin','*'); u.searchParams.set('srlimit','5');
+      const j = await fetchJsonClient(u);
+      return ((j.query&&j.query.search)||[]).map((item,i)=>({ id:'wiki-'+item.pageid, source:'Wikipedia', title:item.title, summary:(item.snippet||'').replace(/<[^>]+>/g,''), url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(item.title.replace(/ /g,'_')), entityType:'unknown', confidence: Math.max(55,90-i*6), provenance:'Wikipedia (live client)', publicOnly:true }));
+    }),
+    run('gleif', 'GLEIF LEI', 'GLEIF LEI', async () => {
+      const u = new URL('https://api.gleif.org/api/v1/lei-records');
+      u.searchParams.set('filter[entity.legalName]', q); u.searchParams.set('page[size]','6');
+      const j = await fetchJsonClient(u);
+      return (j.data||[]).map((item,i)=>{
+        const a=item.attributes||{}; const e=a.entity||{}; const name=(e.legalName&&e.legalName.name)||a.lei;
+        const lei=a.lei||item.id; const country=(e.legalAddress&&e.legalAddress.country)||'';
+        return { id:'gleif-'+lei, source:'GLEIF LEI', title:name, summary:'LEI '+lei+(country?' · '+country:'')+' · status '+(e.status||'n/a'), url:'https://search.gleif.org/#/record/'+encodeURIComponent(lei), entityType:'organization', confidence: Math.max(70,95-i*4), provenance:'GLEIF Golden Copy (live CORS)', publicOnly:true, jurisdiction:country||undefined };
       });
-    }
-    if (titles.length) sources.push("Wikipedia");
-  } catch { warnings.push("Wikipedia client unavailable"); }
-  warnings.push("Running in static dual-mode (no server API). Full multi-connector Veritas API deploys when Vercel/API host is authorized.");
+    }),
+    run('fr-entreprises', 'Business Registry FR', 'Business Registry', async () => {
+      const u = new URL('https://recherche-entreprises.api.gouv.fr/search');
+      u.searchParams.set('q', q); u.searchParams.set('per_page','5');
+      const j = await fetchJsonClient(u);
+      return (j.results||[]).map((item,i)=>({ id:'fr-'+(item.siren||i), source:'Business Registry', title:item.nom_complet||item.nom_raison_sociale, summary:'France SIREN '+(item.siren||'')+' · '+(item.etat_administratif||''), url: item.siren ? 'https://annuaire-entreprises.data.gouv.fr/entreprise/'+item.siren : u.toString(), entityType:'organization', confidence: Math.max(62,90-i*5), provenance:'recherche-entreprises.api.gouv.fr (live)', publicOnly:true, jurisdiction:'FR' }));
+    }),
+    run('usaspending', 'USAspending', 'USAspending', async () => {
+      const j = await fetchJsonClient('https://api.usaspending.gov/api/v2/autocomplete/recipient/', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ search_text:q, limit:5 }) });
+      return (j.results||[]).map((item,i)=>({ id:'usa-'+(item.uei||item.recipient_name||i), source:'USAspending', title:item.recipient_name, summary:'Federal award recipient'+(item.uei?' · UEI '+item.uei:''), url:'https://www.usaspending.gov/search/?query='+encodeURIComponent(item.recipient_name||q), entityType:'organization', confidence: Math.max(58,88-i*5), provenance:'USAspending (live)', publicOnly:true, jurisdiction:'US' }));
+    }),
+  ]);
+  // Public business registry handoffs (directory/411 intent → public registries only)
+  const qq = encodeURIComponent(q);
+  results.push(
+    { id:'biz-oc', source:'Business Registry', title:'OpenCorporates: '+q, summary:'Public company registry aggregator handoff (web). Not private reverse-phone.', url:'https://opencorporates.com/companies?q='+qq, entityType:'organization', confidence:65, provenance:'OpenCorporates handoff', publicOnly:true },
+    { id:'biz-sam', source:'Business Registry', title:'SAM.gov entity: '+q, summary:'US federal System for Award Management public entity registrations.', url:'https://sam.gov/search/?index=ent&page=1&pageSize=25&sfm%5BsimpleSearch%5D%5BkeywordEditorTextarea%5D='+qq, entityType:'organization', confidence:68, provenance:'SAM.gov handoff', publicOnly:true, jurisdiction:'US' },
+    { id:'biz-os', source:'OpenSanctions', title:'OpenSanctions screen: '+q, summary:'Public sanctions/PEP/watchlist handoff — verify primary lists.', url:'https://www.opensanctions.org/search/?q='+qq, entityType:'unknown', confidence:58, provenance:'OpenSanctions web handoff', publicOnly:true },
+    { id:'biz-sec', source:'SEC EDGAR', title:'SEC EDGAR search: '+q, summary:'US securities registrant browse handoff (full index available via Veritas API).', url:'https://www.sec.gov/edgar/search/#/q='+qq, entityType:'organization', confidence:70, provenance:'SEC EDGAR web handoff', publicOnly:true, jurisdiction:'US' }
+  );
+  sources.add('Business Registry'); sources.add('OpenSanctions'); sources.add('SEC EDGAR');
+  if (/411|white\s*pages|yellow\s*pages|phone\s*book|directory/i.test(q)) {
+    warnings.push('Business-directory / 411-style intent: public business registries & LEI only — private reverse-phone / personal white-pages are blocked by policy.');
+  }
+  warnings.push('Live dual-mode: browser calls public CORS APIs directly. Full multi-connector server API attaches when Vercel project permission is granted.');
   return {
-    query: q, exactQuery: q, searchedAt: new Date().toISOString(), mode: "entity",
-    sources, connectorStates: sources.map(s => ({ id: s.toLowerCase(), label: s, status: "ok" })),
-    results, warnings
+    query:q, exactQuery:q, searchedAt:new Date().toISOString(), mode:/411|directory|business/i.test(q)?'business':'entity',
+    sources:[...sources], connectorStates, results, warnings
   };
 }
 
-async function runSearch() {
-  const q = $("#q").value.trim();
+
+runSearch = async function() {
+  const q = $('#q').value.trim();
   if (q.length < 2) return;
-  $("#researchMeta").textContent = "Searching public sources…";
-  $("#researchGrid").innerHTML = "";
-  $("#researchWarns").innerHTML = "";
+  if (/(?:reverse\s*(?:phone|lookup)|phone\s*owner|unlisted\s*number|skip\s*trace|social security|ssn\b)/i.test(q)) {
+    $('#researchMeta').textContent = 'Blocked by policy';
+    $('#researchWarns').innerHTML = '<div class="warn">Private reverse-phone / non-public PII targeting is blocked. Search legal business names, tickers, LEI, or public entities.</div>';
+    return;
+  }
+  $('#researchMeta').textContent = 'Searching public sources…';
+  $('#researchGrid').innerHTML = '';
+  $('#researchWarns').innerHTML = '';
   try {
-    const r = await fetch("/api/research/search?q=" + encodeURIComponent(q));
-    if (!r.ok) throw new Error("api " + r.status);
+    const r = await fetch('/api/research/search?q=' + encodeURIComponent(q));
+    if (!r.ok) throw new Error('api '+r.status);
     const j = await r.json();
-    if (!j.ok) throw new Error(j.error || "fail");
+    if (!j.ok) throw new Error(j.error||'fail');
     lastResearch = j.data;
   } catch (e) {
     lastResearch = await clientSideSearch(q);
   }
   const d = lastResearch;
-  $("#researchMeta").textContent = `${d.results.length} results for “${d.query}” · ${new Date(d.searchedAt).toLocaleString()} · sources: ${(d.sources || []).join(", ")}`;
-  $("#researchWarns").innerHTML = (d.warnings || []).map(w => `<div class="warn">${escapeHtml(w)}</div>`).join("");
-  $("#researchGrid").innerHTML = d.results.map(card).join("") || '<div class="muted">No matches.</div>';
+  $('#researchMeta').textContent = `${d.results.length} results for “${d.query}” · ${new Date(d.searchedAt).toLocaleString()} · ${(d.sources||[]).join(', ')}`;
+  $('#researchWarns').innerHTML = (d.warnings||[]).map(w => `<div class="warn">${escapeHtml(w)}</div>`).join('');
+  $('#researchGrid').innerHTML = d.results.map(card).join('') || '<div class="muted">No matches.</div>';
   renderAnalysis();
-}
-$("#btnSearch").addEventListener("click", runSearch);
-$("#q").addEventListener("keydown", e => { if (e.key === "Enter") runSearch(); });
-
-/* ========= vault ========= */
-function renderVault() {
-  const items = EVIDENCE.filter(e => vaultFilter === "all" || e.status === vaultFilter);
-  $("#vaultGrid").innerHTML = items.map(e => `
-    <article class="card">
-      <div class="meta">${statusPill(e.status)}<span class="pill">${escapeHtml(e.type)}</span><span class="pill conf">${e.score}</span></div>
-      <h3>${escapeHtml(e.title)}</h3>
-      <div class="summary">${escapeHtml(e.summary)}</div>
-      <div class="meta"><span>${escapeHtml(e.source)}</span><span>${escapeHtml(e.date)}</span><span>${escapeHtml(e.size)}</span></div>
-      <div class="muted" style="font-size:11px">${e.custody.map(c => "· " + escapeHtml(c)).join("<br>")}</div>
-      <div class="meta">${e.tags.map(t => `<span class="pill">${escapeHtml(t)}</span>`).join("")}</div>
-    </article>`).join("") || '<div class="muted">No evidence in this filter.</div>';
-  $("#vaultList").innerHTML = vaultNotes.length
-    ? vaultNotes.map((v,i) => `<li style="margin:8px 0">${escapeHtml(v.t)} <span class="muted">· ${new Date(v.at).toLocaleString()}</span>
-        <button class="ghost" data-i="${i}" style="padding:2px 8px">remove</button></li>`).join("")
-    : "<li>No local notes yet.</li>";
-  $$("#vaultList button").forEach(b => b.onclick = () => {
-    vaultNotes.splice(+b.dataset.i, 1);
-    localStorage.setItem("veritas_vault", JSON.stringify(vaultNotes));
-    renderVault();
-  });
-}
-$$("[data-vfilter]").forEach(b => b.onclick = () => { vaultFilter = b.dataset.vfilter; renderVault(); });
-$("#btnVaultAdd").onclick = () => {
-  const t = $("#vaultNote").value.trim(); if (!t) return;
-  vaultNotes.unshift({ t, at: Date.now() });
-  localStorage.setItem("veritas_vault", JSON.stringify(vaultNotes));
-  $("#vaultNote").value = "";
-  renderVault();
-  toast("Local vault note saved");
 };
 
-/* ========= analysis ========= */
-function renderAnalysis() {
-  $("#insightGrid").innerHTML = INSIGHTS.map(i => `
-    <article class="card">
-      <div class="meta"><span class="pill ${tonePill(i.tone)}">${escapeHtml(i.signal)}</span><span class="pill conf">${i.confidence}%</span></div>
-      <h3>${escapeHtml(i.title)}</h3>
-      <div class="summary">${escapeHtml(i.detail)}</div>
-      <div class="bar"><i style="width:${i.confidence}%;background:${i.tone==='cyan'?'var(--accent)':i.tone==='violet'?'var(--violet)':i.tone==='red'?'var(--danger)':'var(--amber)'}"></i></div>
-    </article>`).join("");
-  if (!lastResearch) { $("#analysisOut").textContent = "Run a Public Research query first."; return; }
-  const by = {};
-  for (const r of lastResearch.results) by[r.source] = (by[r.source] || 0) + 1;
-  const conf = lastResearch.results.map(r => r.confidence);
-  const avg = conf.length ? Math.round(conf.reduce((a,b)=>a+b,0)/conf.length) : 0;
-  $("#analysisOut").innerHTML = `<div class="muted">Query: <b>${escapeHtml(lastResearch.query)}</b></div>
-    <pre style="white-space:pre-wrap;color:#c5d2de;font-size:12px;margin:8px 0 0">${escapeHtml(JSON.stringify({ bySource: by, avgConfidence: avg, connectors: lastResearch.connectorStates, mode: lastResearch.mode }, null, 2))}</pre>`;
-}
-
-/* ========= briefing ========= */
-function renderBriefing() {
-  const n = lastResearch?.results?.length || 0;
-  const w = lastResearch?.warnings?.length || 0;
-  $("#briefStats").innerHTML = `
-    <div class="stat"><div class="n">${n}</div><div class="l">Last research hits</div></div>
-    <div class="stat"><div class="n">${w}</div><div class="l">Source warnings</div></div>
-    <div class="stat"><div class="n">${EVIDENCE.filter(e=>e.status==="restricted").length}</div><div class="l">Ethical holds</div></div>
-    <div class="stat"><div class="n">public</div><div class="l">Ceiling mode</div></div>`;
-  $("#briefList").innerHTML = INSIGHTS.map(i =>
-    `<div class="feed-row"><div class="feed-ico" style="color:var(--accent);border-color:rgba(53,224,208,.4);background:rgba(53,224,208,.1)">●</div>
-     <div><div style="font-weight:800;font-size:13px">${escapeHtml(i.title)}</div>
-     <div class="muted" style="font-size:12px">${escapeHtml(i.detail)}</div></div>
-     <span class="pill conf">${i.confidence}%</span></div>`).join("");
-}
-
-/* ========= team ========= */
-function renderTeam() {
-  $("#teamGrid").innerHTML = TASKS.map(t => `
-    <article class="card">
-      <div class="meta"><span class="pill ${t.status==="In review"?"amber":t.status==="Active"?"source":"violet"}">${escapeHtml(t.status)}</span><span>${escapeHtml(t.owner)}</span></div>
-      <h3>${escapeHtml(t.title)}</h3>
-      <div class="bar"><i style="width:${Math.round(t.progress*100)}%;background:var(--accent)"></i></div>
-      <div class="meta">${Math.round(t.progress*100)}% complete</div>
-    </article>`).join("");
-  $("#auditList").innerHTML = AUDIT.map(a =>
-    `<div class="feed-row"><div class="feed-ico" style="color:var(--${a.tone==="cyan"?"accent":a.tone==="violet"?"violet":"amber"});border-color:currentColor;opacity:.9">✎</div>
-     <div style="flex:1"><div style="font-weight:700;font-size:13px">${escapeHtml(a.actor)}</div>
-     <div class="muted">${escapeHtml(a.action)}</div></div><div class="muted" style="font-size:11px">${escapeHtml(a.timestamp)}</div></div>`).join("");
-}
-
-/* ========= copilot ========= */
-function renderCopilotChips() {
-  $("#copilotChips").innerHTML = COPILOT_CHIPS.map(c =>
-    `<button class="chip" data-chip="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join("");
-  $$("[data-chip]").forEach(b => b.onclick = () => { $("#copilotIn").value = b.dataset.chip; $("#btnCopilot").click(); });
-}
-$("#btnCopilot").onclick = () => {
-  const q = $("#copilotIn").value.trim() || "Summarize leads";
-  const verified = EVIDENCE.filter(e => e.status === "verified");
-  const holds = EVIDENCE.filter(e => e.status === "restricted");
-  const top = (lastResearch?.results || []).slice(0,5).map(r => `• [${r.source}] ${r.title} (${r.confidence}%) — ${r.url}`).join("\n");
-  const body = `You asked: ${q}
-
-Northstar strongest verified signals:
-${verified.slice(0,3).map(e => `• ${e.title} (${e.score}%) — ${e.summary}`).join("\n")}
-
-Human review required:
-${holds.map(e => `• ${e.title} — ${e.summary}`).join("\n") || "• none"}
-
-${top ? "Top public research leads:\n" + top : "No public research context yet — run Public Research first."}
-
-Guardrails:
-1. Open each source URL and verify context.
-2. Prefer SEC filings / Wikidata for entity identity.
-3. Treat news/GDELT/X as leads, not proof.
-4. Do not request credentials, private systems, or doxxing.
-5. Keep restricted items quarantined until consent is documented.`;
-  $("#copilotOut").innerHTML = `<div class="meta"><span class="pill violet">ASSISTIVE</span><span class="pill conf">context grounded</span></div>
-    <pre style="white-space:pre-wrap;font-size:13px;color:#d7e3ee;margin:10px 0 0">${escapeHtml(body)}</pre>`;
-};
-
-/* ========= status ========= */
-async function loadCapabilities() {
-  $("#statusStats").innerHTML = `
-    <div class="stat"><div class="n" id="stApi">…</div><div class="l">API health</div></div>
-    <div class="stat"><div class="n">${EVIDENCE.length}</div><div class="l">Fixture evidence</div></div>
-    <div class="stat"><div class="n">${INSIGHTS.length}</div><div class="l">Pattern insights</div></div>
-    <div class="stat"><div class="n">public</div><div class="l">Safety ceiling</div></div>`;
-  try {
-    const r = await fetch("/api/research/capabilities");
-    const j = await r.json();
-    const rows = (j.connectors || []).map(c =>
-      `<tr><td>${escapeHtml(c.label || c.id)}</td><td>${escapeHtml(c.status)}</td><td>${c.requiresCredential ? "yes" : "no"}</td><td>${escapeHtml(c.retention || "")}</td></tr>`
-    ).join("");
-    $("#connTable tbody").innerHTML = rows || "<tr><td colspan=4 class=muted>No connectors reported</td></tr>";
-    $("#statusDetail").textContent = JSON.stringify(j, null, 2);
-    $("#stApi").textContent = "online";
-    $("#stApi").style.color = "var(--ok)";
-  } catch (e) {
-    $("#connTable tbody").innerHTML = `
-      <tr><td>Wikidata</td><td>client dual-mode</td><td>no</td><td>ephemeral</td></tr>
-      <tr><td>Wikipedia</td><td>client dual-mode</td><td>no</td><td>ephemeral</td></tr>
-      <tr><td>SEC EDGAR</td><td>client handoff</td><td>no</td><td>ephemeral</td></tr>
-      <tr><td>GDELT / X</td><td>server only</td><td>optional</td><td>—</td></tr>`;
-    $("#statusDetail").textContent = "Static dual-mode: API offline. Frontend fully operational with client public sources.\n" + String(e);
-    $("#stApi").textContent = "offline";
-    $("#stApi").style.color = "var(--amber)";
-  }
-}
-
-/* boot */
-renderDesk();
 checkHealth();
 setInterval(checkHealth, 30000);
 // deep-link ?view=
