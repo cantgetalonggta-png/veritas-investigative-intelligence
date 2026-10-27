@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Veritas · Investigation Search Engines</title>
+<meta name="description" content="259 search engines with auto-developed investigation query templates. Public records only."/>
+<style>
+:root{--bg:#061117;--surface:#0B1C24;--border:#1A3340;--fg:#E8F1F5;--muted:#7A9AAB;--accent:#00D4C8;--violet:#A78BFA;--amber:#FBBF24;--danger:#FB7185}
+*{box-sizing:border-box}body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh}
+a{color:var(--accent)}header{padding:20px 20px 8px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#0B1C24,transparent)}
+.eyebrow{color:var(--accent);font-size:10px;font-weight:900;letter-spacing:1.4px}
+h1{margin:6px 0 4px;font-size:22px} .sub{color:var(--muted);font-size:12px;line-height:1.5;max-width:720px}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.nav a{display:inline-flex;align-items:center;padding:7px 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--fg);text-decoration:none;font-size:11px;font-weight:700}
+.nav a.primary{background:var(--accent);color:#061117;border-color:transparent}
+.wrap{padding:16px 20px 48px;max-width:1100px;margin:0 auto}
+.panel{border:1px solid var(--border);background:var(--surface);border-radius:16px;padding:14px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:10px}
+.stat{padding:10px;border-radius:12px;border:1px solid var(--border);background:#08151C}
+.stat b{display:block;font-size:18px;color:var(--accent)} .stat span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+input,select,button{font:inherit}
+input,select{background:#08151C;border:1px solid var(--border);color:var(--fg);border-radius:12px;padding:10px 12px;min-height:42px}
+input{flex:1;min-width:140px}
+button{background:var(--accent);color:#061117;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+button.secondary{background:transparent;color:var(--accent);border:1px solid #00D4C855}
+.policy{font-size:11px;color:var(--amber);line-height:1.45;border:1px solid #FBBF2433;background:#FBBF240D;padding:10px;border-radius:12px}
+.engine{border:1px solid var(--border);border-radius:14px;padding:12px;background:#08151C;margin-bottom:10px}
+.engine h3{margin:0 0 4px;font-size:14px} .meta{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.terms{margin:8px 0 0;padding:0;list-style:none} .terms li{font-size:11px;line-height:1.4;color:var(--fg);padding:6px 8px;margin:4px 0;border-radius:8px;background:#0B1C24;border:1px solid var(--border);word-break:break-word}
+.terms a{font-size:10px;margin-left:6px}
+.tag{display:inline-block;font-size:9px;font-weight:800;padding:3px 7px;border-radius:999px;background:#00D4C818;color:var(--accent);margin-right:4px}
+.tag.v{background:#A78BFA18;color:var(--violet)} .tag.a{background:#FBBF2418;color:var(--amber)}
+footer{color:var(--muted);font-size:10px;text-align:center;padding:24px;line-height:1.5}
+#list{min-height:200px}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">VERITAS · PUBLIC INVESTIGATION ENGINE MESH</div>
+  <h1>259 search engines · auto-developed terms</h1>
+  <p class="sub">Enter a subject / org and generate investigation queries across every catalogued engine. Public records only. AI outputs are leads—not evidence.</p>
+  <div class="nav">
+    <a class="primary" href="./">Field desk</a>
+    <a href="./search.html">Search</a>
+    <a href="./engines.html">Engines</a>
+    <a href="./analysis.html">Analysis</a>
+    <a href="./vault.html">Vault</a>
+    <a href="./copilot.html">Copilot</a>
+    <a href="https://github.com/cantgetalonggta-png/veritas-investigative-intelligence" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="panel">
+    <div class="grid" id="stats"></div>
+    <div class="controls">
+      <input id="subject" placeholder="Subject (person)" value=""/>
+      <input id="org" placeholder="Organization"/>
+      <input id="domain" placeholder="domain.example"/>
+      <input id="jurisdiction" placeholder="Jurisdiction"/>
+      <input id="keyword" placeholder="Keyword (procurement, fraud…)" value="procurement"/>
+      <input id="year" placeholder="Year" value="2026" style="max-width:100px"/>
+      <select id="type"><option value="">All types</option></select>
+      <button id="run">Develop all terms</button>
+      <button class="secondary" id="export">Export JSON</button>
+    </div>
+    <div class="policy" id="policy"></div>
+  </div>
+  <div id="list"><p style="color:var(--muted)">Loading catalog…</p></div>
+</div>
+<footer>Veritas Investigative Intelligence · public-source OSINT · no private surveillance · no minor/victim exposure<br/>Live: GitHub Pages production</footer>
+<script>
+const $ = (id)=>document.getElementById(id);
+let CATALOG = null;
+function replaceAll(t, vars){
+  return t
+    .replaceAll('{subject}', vars.subject||'{subject}')
+    .replaceAll('{org}', vars.org||'{org}')
+    .replaceAll('{alias}', vars.alias||vars.subject||'{alias}')
+    .replaceAll('{domain}', vars.domain||'{domain}')
+    .replaceAll('{jurisdiction}', vars.jurisdiction||'{jurisdiction}')
+    .replaceAll('{ticker}', vars.ticker||'{ticker}')
+    .replaceAll('{year}', vars.year||'{year}')
+    .replaceAll('{keyword}', vars.keyword||'{keyword}')
+    .replaceAll('{image_url}', vars.image_url||'{image_url}')
+    .replaceAll('{query}', encodeURIComponent([vars.subject, vars.org].filter(Boolean).join(' ')));
+}
+function buildUrl(tpl, q){
+  if(!tpl) return '#';
+  return tpl.replaceAll('{query}', encodeURIComponent(q)).replaceAll('{image_url}', encodeURIComponent(q));
+}
+function vars(){
+  return {
+    subject: $('subject').value.trim() || 'SUBJECT',
+    org: $('org').value.trim() || 'ORG',
+    domain: $('domain').value.trim(),
+    jurisdiction: $('jurisdiction').value.trim(),
+    keyword: $('keyword').value.trim() || 'investigation',
+    year: $('year').value.trim() || '2026',
+  };
+}
+function render(list){
+  const v = vars();
+  const type = $('type').value;
+  let engines = list.engines;
+  if(type) engines = engines.filter(e=>e.type===type);
+  $('stats').innerHTML = `
+    <div class="stat"><b>${engines.length}</b><span>Engines shown</span></div>
+    <div class="stat"><b>${list.count}</b><span>Catalog total</span></div>
+    <div class="stat"><b>${engines.reduce((n,e)=>n+e.investigation_search_terms.length,0)}</b><span>Term templates</span></div>
+    <div class="stat"><b>${new Set(engines.map(e=>e.type)).size}</b><span>Types</span></div>`;
+  const pol = list.policy||{};
+  $('policy').textContent = 'Policy: public_records_only='+!!pol.public_records_only+
+    ' · no_minors_doxxing='+!!pol.no_minors_doxxing+
+    ' · no_nonconsensual_surveillance='+!!pol.no_nonconsensual_surveillance+
+    ' · ai_leads_only='+!!pol.ai_outputs_are_leads_not_evidence+
+    ' · verify_primary_sources='+!!pol.verify_with_primary_sources;
+  const frag = document.createDocumentFragment();
+  engines.forEach(e=>{
+    const terms = e.investigation_search_terms.map(t=>replaceAll(t,v));
+    const div = document.createElement('div');
+    div.className='engine';
+    div.innerHTML = `<div class="meta"><span class="tag">${e.type}</span><span class="tag v">${e.status}</span><span class="tag a">${e.region}</span></div>
+      <h3>${e.name}</h3>
+      <div class="meta"><a href="${e.website}" target="_blank" rel="noopener">${e.website}</a> · ${e.syntax_notes||''}</div>
+      <ul class="terms">${terms.map(t=>{
+        const url = buildUrl(e.query_url_template, t);
+        return `<li>${t}${url && url!=='#' ? ` <a href="${url}" target="_blank" rel="noopener">open</a>`:''}</li>`;
+      }).join('')}</ul>
+      ${e.notes?`<div class="meta" style="margin-top:6px;color:var(--amber)">${e.notes}</div>`:''}`;
+    frag.appendChild(div);
+  });
+  const listEl=$('list'); listEl.innerHTML=''; listEl.appendChild(frag);
+}
+async function boot(){
+  const res = await fetch('./data/search-engines.json');
+  CATALOG = await res.json();
+  const types = [...new Set(CATALOG.engines.map(e=>e.type))].sort();
+  types.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;$('type').appendChild(o);});
+  render(CATALOG);
+}
+$('run').onclick=()=>render(CATALOG);
+$('type').onchange=()=>render(CATALOG);
+$('export').onclick=()=>{
+  const v=vars();
+  const payload = CATALOG.engines.map(e=>({
+    engine:e.name,type:e.type,status:e.status,website:e.website,
+    terms:e.investigation_search_terms.map(t=>replaceAll(t,v)),
+    queryUrls:e.investigation_search_terms.map(t=>buildUrl(e.query_url_template, replaceAll(t,v)))
+  }));
+  const blob=new Blob([JSON.stringify({vars:v,generatedAt:new Date().toISOString(),plans:payload},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='veritas-engine-terms.json'; a.click();
+};
+boot().catch(err=>{ $('list').innerHTML='<p style="color:var(--danger)">Failed to load catalog: '+err+'</p>'; });
+</script>
+</body>
+</html>
