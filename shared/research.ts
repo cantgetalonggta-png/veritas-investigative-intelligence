@@ -81,3 +81,17 @@ export type SafeQueryTemplate = {
   query: string;
   safetyNote: string;
 };
+
+/** Full multi-engine investigation catalog (259 engines + auto term expansion). */
+export {
+  SEARCH_ENGINES,
+  SEARCH_ENGINES_COUNT,
+  SEARCH_ENGINE_POLICY,
+  SEARCH_ENGINE_PLACEHOLDERS,
+  expandInvestigationTerms,
+  buildEngineQueryUrl,
+  enginesByType,
+  activeEngines,
+  developAllSearchTerms,
+} from "./search-engines-catalog";
+export type { SearchEngineEntry, SearchEngineType, SearchEngineStatus } from "./search-engines-catalog";
