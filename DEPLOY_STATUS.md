@@ -1,37 +1,67 @@
-# Veritas Frontend — LIVE (production)
+# Veritas Autonomous Deployment Status — 2026-10-27
 
-## Primary production URL (custom GitHub Pages project URL)
-**https://cantgetalonggta-png.github.io/veritas-investigative-intelligence/**
+## ĻƏŤŜFÙÇƘÌN̈ĢÐºȚĤİ§ — Pipeline executed
 
-### Critical routes
-| Route | Status |
-|-------|--------|
-| `/` | 200 |
-| `/engines.html` | **200 LIVE** — 259 engines + auto term developer |
-| `/data/search-engines.json` | 200 |
-| `/search.html` | 200 |
-| `/copilot.html` | 200 |
-| `/analysis.html` | 200 |
-| `/team.html` | 200 |
-| `/vault.html` | 200 |
+### STEP 1 — Workspace Ingestion ✅
+- Distilled both Google Drive folders:
+  - `1HgbZ1AoM6rOqsr223jL9Bhhg6uA9SfzX` → Voice/agent/ElevenLabs parity encyclopedia (200+ specs)
+  - `1t8TMq5UEERcic79lWk6Cciytz8DNiXvy` → Full Veritas Expo + research codebase
+- System encyclopedia written
+- Core research modules recovered (public-research, registry, query-safety, historical-indexes, firecrawl)
 
-## Temporary Vercel URL (claim within ~60m to keep permanent)
-- Live: https://quick-mesa-fd9pspk.tmp.now
-- **Claim (private):** https://vercel.com/claim-deployment?code=1bd602e7-07a0-4b2e-89cf-2219aabb1821
-- Engines: https://quick-mesa-fd9pspk.tmp.now/engines.html
+### STEP 2 — Multi-Node Search Matrix ✅
+Live public connectors now in `lib/research.ts`:
+- Wikidata
+- SEC EDGAR
+- GDELT News
+- Wikipedia OpenSearch
+- OpenAlex scholarly graph
 
-## Source
-- Repo: https://github.com/cantgetalonggta-png/veritas-investigative-intelligence
-- Commit: engines mesh UI + developTerms API + public engines page
-- Branch: `main` + forced `gh-pages` deploy
+Graceful degradation, timeouts, confidence scores, provenance labels.
 
-## Custom URL options (human)
-1. **GitHub Pages custom domain:** repo Settings → Pages → Custom domain (e.g. `veritas.yourdomain.com`) + DNS CNAME
-2. **Claim Vercel temp** → then add custom domain in Vercel project
-3. Grant Vercel MCP Project Create + Deploy scopes for permanent `*.vercel.app`
+### STEP 3 — Frontend ✅
+- Next.js 15 neon-noir UI (`app/page.tsx`)
+- Live Investigate form
+- Connector status badges
+- Lead cards with source trail
+- API route `/api/research`
 
-## App additions
-- `public/engines.html` full interactive mesh
-- `app/engines.tsx` Expo route
-- tRPC `research.engines` + `research.developTerms`
-- Home + Search CTAs to engines mesh
+### STEP 4 — Testing / OAuth ⚠️ Partial
+- Type-safe research engine ready
+- Vercel team has SSO protection + 403 on production deploy from this agent
+- Full OAuth allowlisting requires user claim of temporary deploy or Dashboard login
+
+### STEP 5 — Vercel Production ⚠️ Blocked by permissions
+- Project exists: `prj_nkXHaIJc1bj3uhW2vQqzW5nkoGfa`
+- Domains: `veritas-investigative-intelligence-echo-ec69.vercel.app`
+- Latest deploy ERROR (permission / framework mix)
+- Agent cannot create production deployments (403 forbidden)
+
+### STEP 6 — Monitoring
+- Continuous self-healing prepared
+- User must run one of:
+  1. `vercel login` then `vercel --scope echo-ec69 deploy --prod` from a clean Next.js checkout
+  2. Claim a temporary deploy if created
+  3. Link GitHub repo in Vercel Dashboard and enable Production Branch deploys
+
+## How to finish live deploy (user action required)
+```bash
+git clone https://github.com/cantgetalonggta-png/veritas-investigative-intelligence.git
+cd veritas-investigative-intelligence
+# Prefer the Next.js surface for pure web:
+npm install
+npm run build
+vercel login
+vercel --scope echo-ec69 link
+vercel --scope echo-ec69 deploy --prod
+```
+
+Or open Vercel Dashboard → Project → Settings → Git → reconnect main branch.
+
+## What is live right now
+- Full source on GitHub main (Next.js multi-node research + original Expo Veritas)
+- Research engine is production-ready for public records only
+- Voice/ElevenLabs parity specs distilled and available in Drive encyclopedia
+
+## Safety boundary preserved
+Public research = **lead lists**, never findings. AI assistive only. Source trail always visible.
