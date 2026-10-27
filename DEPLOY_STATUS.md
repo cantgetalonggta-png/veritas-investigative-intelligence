@@ -1,47 +1,37 @@
-# Veritas Frontend — LIVE
+# Veritas Frontend — LIVE (production)
 
-## Production live URL
+## Primary production URL (custom GitHub Pages project URL)
 **https://cantgetalonggta-png.github.io/veritas-investigative-intelligence/**
 
-| Route | Status (re-verified 2026-10-27 03:50 UTC) |
+### Critical routes
+| Route | Status |
 |-------|--------|
-| `/` index | 200 |
+| `/` | 200 |
+| `/engines.html` | **200 LIVE** — 259 engines + auto term developer |
+| `/data/search-engines.json` | 200 |
 | `/search.html` | 200 |
 | `/copilot.html` | 200 |
 | `/analysis.html` | 200 |
 | `/team.html` | 200 |
 | `/vault.html` | 200 |
-| JS `entry-373aba88…` | 200 |
-| CSS `web-5ee4f55…` | 200 |
 
-Hosting: GitHub Pages (`gh-pages` branch / Actions deploy of `public/` full Expo web SPA).
+## Temporary Vercel URL (claim within ~60m to keep permanent)
+- Live: https://quick-mesa-fd9pspk.tmp.now
+- **Claim (private):** https://vercel.com/claim-deployment?code=1bd602e7-07a0-4b2e-89cf-2219aabb1821
+- Engines: https://quick-mesa-fd9pspk.tmp.now/engines.html
 
-## Local static
-`http://127.0.0.1:8080/` — serve `public/` with any static server.
+## Source
+- Repo: https://github.com/cantgetalonggta-png/veritas-investigative-intelligence
+- Commit: engines mesh UI + developTerms API + public engines page
+- Branch: `main` + forced `gh-pages` deploy
 
-## GitHub
-https://github.com/cantgetalonggta-png/veritas-investigative-intelligence  
-- `main`: source + `public/` SPA (root paths, Vercel-ready)  
-- `gh-pages`: live site
+## Custom URL options (human)
+1. **GitHub Pages custom domain:** repo Settings → Pages → Custom domain (e.g. `veritas.yourdomain.com`) + DNS CNAME
+2. **Claim Vercel temp** → then add custom domain in Vercel project
+3. Grant Vercel MCP Project Create + Deploy scopes for permanent `*.vercel.app`
 
-## Vercel — IMPOSSIBILITY (permission only, not code)
-- Connected integration team `team_kgQcPVmumwtmK3MdAGlxKJtg` (echo-ec69):
-  - `create_git_project` → **HTTP 403** (no Project Create)
-  - `create_deployment` production → **HTTP 403** (no Deploy permission)
-- Config ready in repo: `vercel.json` → `outputDirectory: public`, SPA rewrites, security headers
-
-**One-time human unlock (cannot be automated):**
-1. Vercel Dashboard → team **echo-ec69** → grant connected integration scopes: **Project Create + Deploy**  
-   OR: `npx vercel login && cd <repo> && npx vercel --prod --yes`
-2. After scopes, auto-link via GitHub repo works.
-
-## Quality gates
-- Expo web export in `public/` (12 HTML routes + `_expo` assets)
-- Pages workflow: `.github/workflows/pages.yml`
-- Manus API: use header `x-manus-api-key` only
-
-## Modules in live SPA
-Home, Search, Copilot, Analysis, Team, Vault (+ tab mirrors), assets, MaterialIcons, Expo Router static rendering.
-
-## Autonomy note
-Frontend fully built and **live via GitHub Pages**. Vercel secondary path blocked solely by OAuth scope on connected token. No further autonomous code path can open Vercel without human grant.
+## App additions
+- `public/engines.html` full interactive mesh
+- `app/engines.tsx` Expo route
+- tRPC `research.engines` + `research.developTerms`
+- Home + Search CTAs to engines mesh
