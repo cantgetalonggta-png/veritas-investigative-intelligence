@@ -1,539 +1,579 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Veritas Investigative Intelligence</title>
-<meta name="description" content="Public-record investigative research workspace — Wikidata, SEC EDGAR, GDELT, historical indexes. Northstar Ledger field desk." />
-<meta name="theme-color" content="#0b0f14" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f14'/%3E%3Ccircle cx='32' cy='32' r='14' fill='none' stroke='%2335E0D0' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%2335E0D0'/%3E%3C/svg%3E" />
-<style>
-:root {
-  --bg:#090d16; --panel:#121a22; --surface:#0d151d; --line:#1e2a36; --text:#e8eef4; --muted:#8aa0b5;
-  --accent:#35E0D0; --accent2:#5b8cff; --violet:#A78BFA; --amber:#FBBF24; --danger:#FB7185; --ok:#3dd68c;
-  --radius:14px; --font:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-}
-*{box-sizing:border-box} html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--font)}
-a{color:var(--accent2)} button{font:inherit}
-.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
-.nav{background:#0a1017;border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;overflow:auto}
-.brand{font-weight:800;letter-spacing:.06em;font-size:14px;margin-bottom:4px}
-.brand span{color:var(--accent)}
-.tag{color:var(--muted);font-size:11px;margin-bottom:18px;line-height:1.4}
-.nav button{width:100%;text-align:left;background:transparent;border:1px solid transparent;color:var(--text);padding:10px 12px;border-radius:10px;margin-bottom:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px}
-.nav button.active,.nav button:hover{background:var(--panel);border-color:var(--line)}
-.nav .dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
-.nav button.active .dot{background:var(--accent);box-shadow:0 0 8px var(--accent)}
-.main{padding:22px 28px 70px;max-width:1120px}
-.header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.eyebrow{color:var(--accent);font-size:10px;font-weight:900;letter-spacing:1.4px;margin:0 0 6px}
-.h1{font-size:24px;margin:0;font-weight:800}
-.sub{color:var(--muted);font-size:13px;margin-top:6px}
-.badge{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-.badge.ok{border-color:rgba(61,214,140,.45);color:var(--ok);background:rgba(61,214,140,.08)}
-.badge.warn{border-color:rgba(251,191,36,.45);color:var(--amber);background:rgba(251,191,36,.08)}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-input,select,textarea{flex:1;min-width:160px;background:#0b1219;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:12px 14px;font-size:14px;outline:none}
-input:focus,textarea:focus{border-color:var(--accent)}
-button.primary{background:linear-gradient(135deg,var(--accent),#2bb8d4);color:#041018;border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer}
-button.ghost{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;cursor:pointer}
-button.chip{background:rgba(53,224,208,.08);border:1px solid rgba(53,224,208,.25);color:var(--accent);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:700}
-.muted{color:var(--muted);font-size:13px;line-height:1.5}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
-.card h3{margin:0;font-size:14px;line-height:1.35;font-weight:800}
-.meta{font-size:11px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.pill{border:1px solid var(--line);border-radius:999px;padding:2px 8px}
-.pill.source{color:var(--accent);border-color:rgba(53,224,208,.35)}
-.pill.violet{color:var(--violet);border-color:rgba(167,139,250,.4)}
-.pill.amber{color:var(--amber);border-color:rgba(251,191,36,.4)}
-.pill.red{color:var(--danger);border-color:rgba(251,113,133,.45)}
-.pill.ok{color:var(--ok);border-color:rgba(61,214,140,.4)}
-.conf{color:var(--amber)}
-.summary{font-size:13px;color:#c5d2de;line-height:1.45;flex:1}
-.warns{margin-top:10px}
-.warn{background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.3);color:#f3d98c;padding:8px 10px;border-radius:8px;font-size:12px;margin-bottom:6px}
-.hidden{display:none!important}
-.statrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
-.stat .n{font-size:22px;font-weight:800}
-.stat .l{font-size:11px;color:var(--muted);margin-top:4px}
-.table{width:100%;border-collapse:collapse;font-size:13px}
-.table th,.table td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-.footer{margin-top:28px;color:var(--muted);font-size:12px}
-.case-hero{background:linear-gradient(160deg,rgba(53,224,208,.12),rgba(167,139,250,.06) 50%,var(--panel));border:1px solid rgba(53,224,208,.28)}
-.progress{height:7px;border-radius:7px;background:#253145;overflow:hidden;margin-top:8px}
-.progress>i{display:block;height:100%;background:var(--accent);border-radius:7px}
-.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
-.quick button{min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-radius:16px;background:var(--surface);border:1px solid var(--line);color:var(--text);cursor:pointer;font-size:12px;font-weight:700}
-.quick button:hover{border-color:rgba(53,224,208,.4)}
-.feed-row{display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid rgba(30,42,54,.8)}
-.feed-row:last-child{border-bottom:0}
-.feed-ico{width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center;border:1px solid;font-size:12px;flex-shrink:0}
-.signal-map{position:relative;height:220px;border-radius:14px;background:radial-gradient(circle at 50% 50%,#15202c 0%,#0b1219 70%);border:1px solid var(--line);overflow:hidden}
-.signal-map .node{position:absolute;transform:translate(-50%,-50%);padding:6px 10px;border-radius:999px;border:1px solid;font-size:11px;font-weight:800;background:rgba(9,13,22,.85);white-space:nowrap}
-.bar{height:6px;border-radius:6px;background:#253145;overflow:hidden}
-.bar>i{display:block;height:100%;border-radius:6px}
-.toast{position:fixed;bottom:18px;right:18px;background:#12202c;border:1px solid var(--line);padding:12px 16px;border-radius:12px;font-size:13px;z-index:50;box-shadow:0 12px 40px rgba(0,0,0,.35);max-width:320px}
-@media (max-width:900px){
-  .app{grid-template-columns:1fr}
-  .nav{height:auto;position:relative;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .nav .tag,.nav .brand{width:100%}
-  .nav button{width:auto}
-  .quick{grid-template-columns:1fr}
-  .main{padding:16px 14px 60px}
-}
-</style>
-</head>
-<body>
-<div class="app">
-  <aside class="nav">
-    <div class="brand">VERITAS <span>OSINT</span></div>
-    <div class="tag">Public-record investigative workspace · safety ceiling enforced</div>
-    <button class="active" data-view="desk"><span class="dot"></span>Field Desk</button>
-    <button data-view="research"><span class="dot"></span>Public Research</button>
-    <button data-view="briefing"><span class="dot"></span>Briefing</button>
-    <button data-view="vault"><span class="dot"></span>Evidence Vault</button>
-    <button data-view="analysis"><span class="dot"></span>Pattern Finder</button>
-    <button data-view="team"><span class="dot"></span>Collaboration</button>
-    <button data-view="copilot"><span class="dot"></span>Copilot</button>
-    <button data-view="status"><span class="dot"></span>System Status</button>
-  </aside>
-  <main class="main">
-    <div class="header">
-      <div>
-        <p class="eyebrow" id="viewEyebrow">VERITAS / FIELD DESK</p>
-        <h1 class="h1" id="viewTitle">Good evening, Maya</h1>
-        <div class="sub" id="viewSub">Your case desk is quiet. The signal is not.</div>
-      </div>
-      <div id="healthBadge" class="badge">checking…</div>
-    </div>
-
-    <!-- FIELD DESK -->
-    <section id="view-desk" class="view">
-      <div class="panel" style="padding:12px">
-        <div class="row">
-          <input id="deskQ" placeholder="Search a person or business in public records" />
-          <button class="primary" id="btnDeskSearch">Search</button>
-        </div>
-        <div class="muted" style="margin-top:8px;font-size:11px">Wikidata · SEC EDGAR · GDELT news · connected public posts</div>
-      </div>
-      <div class="panel case-hero" id="caseCard"></div>
-      <div class="quick">
-        <button data-jump="briefing">＋ New case</button>
-        <button data-jump="vault">⬆ Import evidence</button>
-        <button data-jump="analysis">◎ View leads</button>
-      </div>
-      <div class="panel">
-        <div class="meta" style="margin-bottom:10px"><strong style="color:var(--text);font-size:13px">Signal map</strong><span class="pill source">LIVE</span></div>
-        <div class="signal-map" id="signalMap"></div>
-      </div>
-      <div class="statrow" id="deskStats"></div>
-      <div class="panel" style="margin-top:14px">
-        <div class="meta" style="margin-bottom:6px"><strong style="color:var(--text)">Signal feed</strong><span class="pill amber">LIVE</span></div>
-        <div id="signalFeed"></div>
-      </div>
-      <div class="panel" id="deskCopilot"></div>
-    </section>
-
-    <!-- RESEARCH -->
-    <section id="view-research" class="view hidden">
-      <div class="panel">
-        <div class="muted" style="margin-bottom:10px">Search public sources only (Wikidata, SEC EDGAR, GDELT, optional X). Results are <b>leads</b>, not findings. Credential / private-access queries are blocked by query-safety.</div>
-        <div class="row">
-          <input id="q" placeholder="Name, company, ticker, or domain…" value="Microsoft" />
-          <button class="primary" id="btnSearch">Search</button>
-        </div>
-      </div>
-      <div id="researchMeta" class="muted"></div>
-      <div id="researchWarns" class="warns"></div>
-      <div id="researchGrid" class="grid"></div>
-    </section>
-
-    <!-- BRIEFING -->
-    <section id="view-briefing" class="view hidden">
-      <div class="statrow" id="briefStats"></div>
-      <div class="panel" style="margin-top:14px">
-        <h3 style="margin:0 0 8px;font-size:14px">Today’s desk</h3>
-        <div class="muted">Northstar Ledger fixture briefing + live public research handoff. Production cases require membership, encryption, and audit before real material.</div>
-        <div id="briefList" style="margin-top:12px"></div>
-      </div>
-    </section>
-
-    <!-- VAULT -->
-    <section id="view-vault" class="view hidden">
-      <div class="panel">
-        <div class="muted">Evidence Vault — fixture chain-of-custody + local session notes. Restricted items remain quarantined. Server storage requires DATABASE_URL + auth.</div>
-        <div class="row" style="margin-top:12px">
-          <input id="vaultNote" placeholder="Add local session note (not server-persisted without auth)" />
-          <button class="ghost" id="btnVaultAdd">Add note</button>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <button class="chip" data-vfilter="all">All</button>
-          <button class="chip" data-vfilter="verified">Verified</button>
-          <button class="chip" data-vfilter="uncertain">Uncertain</button>
-          <button class="chip" data-vfilter="restricted">Restricted</button>
-        </div>
-      </div>
-      <div class="grid" id="vaultGrid"></div>
-      <ul id="vaultList" class="muted" style="padding-left:18px"></ul>
-    </section>
-
-    <!-- ANALYSIS -->
-    <section id="view-analysis" class="view hidden">
-      <div class="panel">
-        <div class="muted">Pattern Finder — entity clusters, temporal anomalies, ethical holds. Insights are recommendations, not conclusions.</div>
-      </div>
-      <div class="grid" id="insightGrid"></div>
-      <div class="panel" style="margin-top:8px">
-        <div class="meta" style="margin-bottom:8px"><strong style="color:var(--text)">Last public research analysis</strong></div>
-        <div id="analysisOut" class="muted">Run a Public Research query first.</div>
-      </div>
-    </section>
-
-    <!-- TEAM -->
-    <section id="view-team" class="view hidden">
-      <div class="panel">
-        <div class="muted">Collaboration Hub — single-operator public research mode. Wire OAuth (MANUS_*) for multi-user case membership.</div>
-      </div>
-      <div class="grid" id="teamGrid"></div>
-      <div class="panel">
-        <div class="meta" style="margin-bottom:8px"><strong style="color:var(--text)">Audit trail</strong></div>
-        <div id="auditList"></div>
-      </div>
-    </section>
-
-    <!-- COPILOT -->
-    <section id="view-copilot" class="view hidden">
-      <div class="panel">
-        <div class="muted">Investigative Copilot is assistive only. It does not invent private data and must keep source trails visible.</div>
-        <div class="row" style="margin-top:10px;flex-wrap:wrap" id="copilotChips"></div>
-        <div class="row" style="margin-top:10px">
-          <input id="copilotIn" placeholder="Ask about last research results or Northstar case…" />
-          <button class="primary" id="btnCopilot">Assist</button>
-        </div>
-      </div>
-      <div id="copilotOut" class="panel muted"></div>
-    </section>
-
-    <!-- STATUS -->
-    <section id="view-status" class="view hidden">
-      <div class="statrow" id="statusStats"></div>
-      <div class="panel" style="margin-top:14px">
-        <table class="table" id="connTable">
-          <thead><tr><th>Connector</th><th>Status</th><th>Credential</th><th>Retention</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="panel muted" id="statusDetail">Loading…</div>
-    </section>
-
-    <div class="footer">Veritas Investigative Intelligence · public-record ceiling · no credential targeting · dual-mode SPA · <code>/api/health</code> · <code>/api/research/search?q=</code></div>
-  </main>
-</div>
-<script>
-/* ========= fixtures (Northstar Ledger) ========= */
-const CASE = { id:"case-001", name:"Northstar Ledger", status:"Active / 14 days", description:"Follow the money trail across three shell entities and two public procurement records.", progress:68, sources:42, entities:18, signals:7 };
-const EVIDENCE = [
-  {id:"ev-001",title:"Port Authority tender ledger — Q3",type:"Document",status:"verified",score:96,date:"18 Oct 2026",size:"4.8 MB",source:"Public procurement portal",license:"Open government data",tags:["procurement","Northstar","Q3"],custody:["Imported by Maya Chen · 18 Oct","Hash verified · 18 Oct","Source checked · 19 Oct"],summary:"A structured export with 19 award records. Two vendor names overlap with the Northstar network."},
-  {id:"ev-002",title:"Invoice_4481_redacted.pdf",type:"Document",status:"uncertain",score:72,date:"17 Oct 2026",size:"1.2 MB",source:"Anonymous submission",license:"Consent pending",tags:["invoice","redaction","review"],custody:["Received via secure drop · 17 Oct","Metadata mismatch flagged · 17 Oct"],summary:"Invoice references a contractor name found in the tender ledger. Original provenance needs human review."},
-  {id:"ev-003",title:"Harbor route audio memo",type:"Audio",status:"verified",score:88,date:"14 Oct 2026",size:"18.4 MB",source:"Reporter interview",license:"Reporter-owned recording",tags:["harbor","interview","route"],custody:["Recorded by Maya Chen · 14 Oct","Transcript generated · 15 Oct"],summary:"Interview places a Northstar intermediary at the same harbor office as a flagged vendor."},
-  {id:"ev-004",title:"Private contact export",type:"Note",status:"restricted",score:41,date:"11 Oct 2026",size:"82 KB",source:"Unverified third party",license:"Restricted / consent missing",tags:["contacts","privacy","hold"],custody:["Imported by Arun Patel · 11 Oct","Consent review required · 11 Oct"],summary:"Contains personal contact details unrelated to the public-interest question. Keep quarantined."},
-  {id:"ev-005",title:"Harbor office exterior — 2026-10-08",type:"Image",status:"verified",score:91,date:"08 Oct 2026",size:"7.1 MB",source:"Reporter field photo",license:"Reporter-owned image",tags:["harbor","location","field"],custody:["Captured by Sam Okafor · 08 Oct","EXIF preserved · 08 Oct"],summary:"Geotag places the office within 150m of the registered address for a Northstar supplier."}
-];
-const INSIGHTS = [
-  {id:"in-001",title:"Two vendors share a director",detail:"Northstar Marine and Harbor Civic appear to share a director across 6 award records.",confidence:94,tone:"cyan",signal:"ENTITY CLUSTER"},
-  {id:"in-002",title:"Payment cadence breaks pattern",detail:"Three transfers land 48–72 hours before procurement milestones in the ledger.",confidence:81,tone:"violet",signal:"TEMPORAL ANOMALY"},
-  {id:"in-003",title:"Source consent needs review",detail:"The private contact export contains personal data that is not necessary for this case.",confidence:99,tone:"red",signal:"ETHICAL HOLD"}
-];
-const NODES = [
-  {id:"n1",label:"Northstar",kind:"organization",x:50,y:43,color:"#35E0D0"},
-  {id:"n2",label:"Harbor Civic",kind:"organization",x:23,y:25,color:"#A78BFA"},
-  {id:"n3",label:"A. Mercer",kind:"person",x:76,y:25,color:"#FBBF24"},
-  {id:"n4",label:"Port Authority",kind:"organization",x:22,y:72,color:"#35E0D0"},
-  {id:"n5",label:"Harbor Office",kind:"location",x:78,y:71,color:"#F472B6"}
-];
-const TASKS = [
-  {id:"t1",title:"Verify director overlap",owner:"Maya",progress:0.82,status:"In review"},
-  {id:"t2",title:"Request tender metadata",owner:"Arun",progress:0.45,status:"Active"},
-  {id:"t3",title:"Draft source note",owner:"Sam",progress:0.18,status:"Queued"}
-];
-const AUDIT = [
-  {id:"a1",actor:"Maya Chen",action:"reviewed tender ledger",timestamp:"2m ago",tone:"cyan"},
-  {id:"a2",actor:"Arun Patel",action:"added a provenance note",timestamp:"28m ago",tone:"violet"},
-  {id:"a3",actor:"Sam Okafor",action:"flagged a consent issue",timestamp:"1h ago",tone:"amber"}
-];
-const COPILOT_CHIPS = [
-  "Summarize the strongest verified signal",
-  "What needs human review before publication?",
-  "Find connections to Harbor Civic"
-];
-
-/* ========= state ========= */
-const $ = (s) => document.querySelector(s);
-const $$ = (s) => [...document.querySelectorAll(s)];
-let lastResearch = null;
-let vaultFilter = "all";
-const vaultNotes = JSON.parse(localStorage.getItem("veritas_vault") || "[]");
-const hour = new Date().getHours();
-const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-
-function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&","<":"<",">":">",'"':""","'":"&#39;"}[c]));
-}
-function statusPill(st) {
-  if (st === "verified") return '<span class="pill ok">verified</span>';
-  if (st === "uncertain") return '<span class="pill amber">uncertain</span>';
-  return '<span class="pill red">restricted</span>';
-}
-function tonePill(t) {
-  if (t === "cyan") return "source";
-  if (t === "violet") return "violet";
-  if (t === "red") return "red";
-  return "amber";
-}
-function toast(msg) {
-  const el = document.createElement("div");
-  el.className = "toast"; el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 2800);
-}
-
-const titles = {
-  desk: { eyebrow:"VERITAS / FIELD DESK", title: greeting + ", Maya", sub:"Your case desk is quiet. The signal is not." },
-  research: { eyebrow:"VERITAS / PUBLIC RESEARCH", title:"Public Research", sub:"Source-cited leads from public records only." },
-  briefing: { eyebrow:"VERITAS / BRIEFING", title:"Briefing Desk", sub:"Northstar Ledger + live research handoff." },
-  vault: { eyebrow:"VERITAS / VAULT", title:"Evidence Vault", sub:"Provenance · custody · ethical holds." },
-  analysis: { eyebrow:"VERITAS / ANALYSIS", title:"Pattern Finder", sub:"Recommendations, not conclusions." },
-  team: { eyebrow:"VERITAS / COLLAB", title:"Collaboration Hub", sub:"Tasks · audit · secure room status." },
-  copilot: { eyebrow:"VERITAS / COPILOT", title:"Investigative Copilot", sub:"Assistive only · source trails required." },
-  status: { eyebrow:"VERITAS / SYSTEM", title:"System Status", sub:"Connectors · health · dual-mode." }
-};
-
-function setView(name) {
-  $$(".nav button").forEach(b => b.classList.toggle("active", b.dataset.view === name));
-  $$(".view").forEach(v => v.classList.toggle("hidden", v.id !== "view-" + name));
-  const t = titles[name] || titles.desk;
-  $("#viewEyebrow").textContent = t.eyebrow;
-  $("#viewTitle").textContent = t.title;
-  $("#viewSub").textContent = t.sub;
-  if (name === "status") loadCapabilities();
-  if (name === "briefing") renderBriefing();
-  if (name === "vault") renderVault();
-  if (name === "analysis") renderAnalysis();
-  if (name === "team") renderTeam();
-  if (name === "desk") renderDesk();
-  if (name === "copilot") renderCopilotChips();
-}
-
-$$(".nav button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
-$$("[data-jump]").forEach(b => b.addEventListener("click", () => setView(b.dataset.jump)));
-
-/* ========= health ========= */
-async function checkHealth() {
-  try {
-    const r = await fetch("/api/health", { cache: "no-store" });
-    const j = await r.json();
-    const el = $("#healthBadge");
-    if (j.ok) { el.textContent = "API online · " + (j.service || "veritas"); el.className = "badge ok"; }
-    else { el.textContent = "API degraded"; el.className = "badge warn"; }
-  } catch {
-    $("#healthBadge").textContent = "Static dual-mode";
-    $("#healthBadge").className = "badge warn";
-  }
-}
-
-/* ========= desk ========= */
-function renderDesk() {
-  $("#caseCard").innerHTML = `
-    <div class="meta"><span class="pill source">ACTIVE INVESTIGATION</span><span class="pill ok">LIVE</span></div>
-    <h2 style="margin:8px 0 0;font-size:22px">${escapeHtml(CASE.name)}</h2>
-    <div class="muted" style="margin-top:8px">${escapeHtml(CASE.description)}</div>
-    <div class="meta" style="margin-top:14px;justify-content:space-between"><span>CASE SIGNAL COVERAGE</span><span style="color:var(--accent);font-weight:800">${CASE.progress}%</span></div>
-    <div class="progress"><i style="width:${CASE.progress}%"></i></div>
-    <div class="meta" style="margin-top:10px;justify-content:space-between"><span>Updated 2m ago</span><span>${escapeHtml(CASE.status)}</span></div>`;
-  $("#deskStats").innerHTML = `
-    <div class="stat"><div class="n" style="color:var(--accent)">${CASE.sources}</div><div class="l">Sources indexed</div></div>
-    <div class="stat"><div class="n" style="color:var(--violet)">${CASE.entities}</div><div class="l">Entities linked</div></div>
-    <div class="stat"><div class="n" style="color:var(--amber)">${CASE.signals}</div><div class="l">Signals to review</div></div>
-    <div class="stat"><div class="n">${vaultNotes.length}</div><div class="l">Local vault notes</div></div>`;
-  $("#signalMap").innerHTML = NODES.map(n =>
-    `<div class="node" style="left:${n.x}%;top:${n.y}%;color:${n.color};border-color:${n.color}66">${escapeHtml(n.label)}</div>`
-  ).join("");
-  $("#signalFeed").innerHTML = [
-    {ico:"◎",c:"#35E0D0",t:"Director overlap detected",b:"Northstar Marine ↔ Harbor Civic",time:"2m ago"},
-    {ico:"◷",c:"#A78BFA",t:"Payment cadence breaks pattern",b:"3 transfers before milestones",time:"18m ago"},
-    {ico:"!",c:"#FBBF24",t:"Consent review required",b:"Private contact export quarantined",time:"1h ago"}
-  ].map(f => `<div class="feed-row"><div class="feed-ico" style="color:${f.c};border-color:${f.c}55;background:${f.c}16">${f.ico}</div>
-    <div style="flex:1"><div style="font-weight:800;font-size:13px">${escapeHtml(f.t)}</div><div class="muted" style="font-size:12px">${escapeHtml(f.b)}</div></div>
-    <div class="muted" style="font-size:11px">${f.time}</div></div>`).join("");
-  $("#deskCopilot").innerHTML = `
-    <div class="meta"><span class="pill violet">ASSISTIVE</span><span>Copilot brief</span></div>
-    <div style="margin-top:10px;font-weight:800">One review item needs your attention</div>
-    <div class="muted" style="margin-top:6px">“The private contact export should remain quarantined until consent is documented.”</div>
-    <div class="meta" style="margin-top:12px;justify-content:space-between"><span class="pill violet">HUMAN REVIEW</span><span>96% context confidence</span></div>
-    <div class="bar" style="margin-top:8px"><i style="width:96%;background:var(--violet)"></i></div>
-    <div style="margin-top:12px"><button class="ghost" onclick="setView('copilot')">Open Copilot →</button></div>`;
-}
-$("#btnDeskSearch").onclick = () => {
-  const v = $("#deskQ").value.trim();
-  if (v.length < 2) return;
-  $("#q").value = v;
-  setView("research");
-  runSearch();
-};
-$("#deskQ").addEventListener("keydown", e => { if (e.key === "Enter") $("#btnDeskSearch").click(); });
-
-/* ========= research ========= */
-function card(item) {
-  return `<article class="card">
-    <div class="meta"><span class="pill source">${escapeHtml(item.source)}</span><span class="pill conf">${item.confidence}% conf</span><span class="pill">${escapeHtml(item.entityType || "unknown")}</span></div>
-    <h3>${escapeHtml(item.title)}</h3>
-    <div class="summary">${escapeHtml(item.summary || "")}</div>
-    <div class="meta"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Open source</a><span>${escapeHtml(item.provenance || "")}</span></div>
-  </article>`;
-}
-
-// Dual-mode: prefer same-origin API, else LIVE public CORS sources (no sandbox)
-async function fetchJsonClient(url, init) {
-  const r = await fetch(url, init);
-  if (!r.ok) throw new Error(String(r.status));
-  return r.json();
-}
-function mapCard(item) {
-  return item;
-}
-async function clientSideSearch(q) {
-  const results = [];
-  const warnings = [];
-  const connectorStates = [];
-  const sources = new Set();
-  async function run(id, label, source, fn) {
-    try {
-      const rows = await fn();
-      results.push(...rows);
-      if (rows.length) sources.add(source);
-      connectorStates.push({ id, label, source, status: rows.length ? 'ok' : 'partial', requiresCredential: false, retention: 'source-linked' });
-    } catch (e) {
-      warnings.push(label + ' unavailable');
-      connectorStates.push({ id, label, source, status: 'unavailable', requiresCredential: false, retention: 'source-linked' });
-    }
-  }
-  await Promise.all([
-    run('wikidata', 'Wikidata', 'Wikidata', async () => {
-      const u = new URL('https://www.wikidata.org/w/api.php');
-      u.searchParams.set('action','wbsearchentities'); u.searchParams.set('search', q);
-      u.searchParams.set('language','en'); u.searchParams.set('format','json'); u.searchParams.set('origin','*'); u.searchParams.set('limit','6');
-      const j = await fetchJsonClient(u);
-      return (j.search||[]).map((item,i)=>({ id:'wikidata-'+item.id, source:'Wikidata', title:item.label, summary:item.description||'Wikidata entity', url:'https://www.wikidata.org/wiki/'+item.id, entityType:'unknown', confidence: Math.max(58,94-i*7), provenance:'Wikidata (live client)', publicOnly:true }));
-    }),
-    run('wikipedia', 'Wikipedia', 'Wikipedia', async () => {
-      const u = new URL('https://en.wikipedia.org/w/api.php');
-      u.searchParams.set('action','query'); u.searchParams.set('list','search'); u.searchParams.set('srsearch', q);
-      u.searchParams.set('format','json'); u.searchParams.set('origin','*'); u.searchParams.set('srlimit','5');
-      const j = await fetchJsonClient(u);
-      return ((j.query&&j.query.search)||[]).map((item,i)=>({ id:'wiki-'+item.pageid, source:'Wikipedia', title:item.title, summary:(item.snippet||'').replace(/<[^>]+>/g,''), url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(item.title.replace(/ /g,'_')), entityType:'unknown', confidence: Math.max(55,90-i*6), provenance:'Wikipedia (live client)', publicOnly:true }));
-    }),
-    run('gleif', 'GLEIF LEI', 'GLEIF LEI', async () => {
-      const u = new URL('https://api.gleif.org/api/v1/lei-records');
-      u.searchParams.set('filter[entity.legalName]', q); u.searchParams.set('page[size]','6');
-      const j = await fetchJsonClient(u);
-      return (j.data||[]).map((item,i)=>{
-        const a=item.attributes||{}; const e=a.entity||{}; const name=(e.legalName&&e.legalName.name)||a.lei;
-        const lei=a.lei||item.id; const country=(e.legalAddress&&e.legalAddress.country)||'';
-        return { id:'gleif-'+lei, source:'GLEIF LEI', title:name, summary:'LEI '+lei+(country?' · '+country:'')+' · status '+(e.status||'n/a'), url:'https://search.gleif.org/#/record/'+encodeURIComponent(lei), entityType:'organization', confidence: Math.max(70,95-i*4), provenance:'GLEIF Golden Copy (live CORS)', publicOnly:true, jurisdiction:country||undefined };
-      });
-    }),
-    run('fr-entreprises', 'Business Registry FR', 'Business Registry', async () => {
-      const u = new URL('https://recherche-entreprises.api.gouv.fr/search');
-      u.searchParams.set('q', q); u.searchParams.set('per_page','5');
-      const j = await fetchJsonClient(u);
-      return (j.results||[]).map((item,i)=>({ id:'fr-'+(item.siren||i), source:'Business Registry', title:item.nom_complet||item.nom_raison_sociale, summary:'France SIREN '+(item.siren||'')+' · '+(item.etat_administratif||''), url: item.siren ? 'https://annuaire-entreprises.data.gouv.fr/entreprise/'+item.siren : u.toString(), entityType:'organization', confidence: Math.max(62,90-i*5), provenance:'recherche-entreprises.api.gouv.fr (live)', publicOnly:true, jurisdiction:'FR' }));
-    }),
-    run('usaspending', 'USAspending', 'USAspending', async () => {
-      const j = await fetchJsonClient('https://api.usaspending.gov/api/v2/autocomplete/recipient/', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ search_text:q, limit:5 }) });
-      return (j.results||[]).map((item,i)=>({ id:'usa-'+(item.uei||item.recipient_name||i), source:'USAspending', title:item.recipient_name, summary:'Federal award recipient'+(item.uei?' · UEI '+item.uei:''), url:'https://www.usaspending.gov/search/?query='+encodeURIComponent(item.recipient_name||q), entityType:'organization', confidence: Math.max(58,88-i*5), provenance:'USAspending (live)', publicOnly:true, jurisdiction:'US' }));
-    }),
-  ]);
-  // Public business registry handoffs (directory/411 intent → public registries only)
-  const qq = encodeURIComponent(q);
-  results.push(
-    { id:'biz-oc', source:'Business Registry', title:'OpenCorporates: '+q, summary:'Public company registry aggregator handoff (web). Not private reverse-phone.', url:'https://opencorporates.com/companies?q='+qq, entityType:'organization', confidence:65, provenance:'OpenCorporates handoff', publicOnly:true },
-    { id:'biz-sam', source:'Business Registry', title:'SAM.gov entity: '+q, summary:'US federal System for Award Management public entity registrations.', url:'https://sam.gov/search/?index=ent&page=1&pageSize=25&sfm%5BsimpleSearch%5D%5BkeywordEditorTextarea%5D='+qq, entityType:'organization', confidence:68, provenance:'SAM.gov handoff', publicOnly:true, jurisdiction:'US' },
-    { id:'biz-os', source:'OpenSanctions', title:'OpenSanctions screen: '+q, summary:'Public sanctions/PEP/watchlist handoff — verify primary lists.', url:'https://www.opensanctions.org/search/?q='+qq, entityType:'unknown', confidence:58, provenance:'OpenSanctions web handoff', publicOnly:true },
-    { id:'biz-sec', source:'SEC EDGAR', title:'SEC EDGAR search: '+q, summary:'US securities registrant browse handoff (full index available via Veritas API).', url:'https://www.sec.gov/edgar/search/#/q='+qq, entityType:'organization', confidence:70, provenance:'SEC EDGAR web handoff', publicOnly:true, jurisdiction:'US' }
-  );
-  sources.add('Business Registry'); sources.add('OpenSanctions'); sources.add('SEC EDGAR');
-  if (/411|white\s*pages|yellow\s*pages|phone\s*book|directory/i.test(q)) {
-    warnings.push('Business-directory / 411-style intent: public business registries & LEI only — private reverse-phone / personal white-pages are blocked by policy.');
-  }
-  warnings.push('Live dual-mode: browser calls public CORS APIs directly. Full multi-connector server API attaches when Vercel project permission is granted.');
-  
-  // Public phone book / 411 / reverse-directory handoffs (journalistic first pass)
-  const phones = (q.match(/(?:\+?\d{1,3}[\s.-]?)?(?:\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}\b|\b\d{10,15}\b/g)||[]).map(m=>m.replace(/[^\d+]/g,''));
-  const phone = phones[0];
-  const qq = encodeURIComponent(q);
-  const pq = encodeURIComponent(phone||q);
-  results.push(
-    { id:'dir-wp', source:'Public Directory', title: phone?('Whitepages reverse: '+phone):('Whitepages: '+q), summary:'Published white-pages / public listings — standard desk 411 workflow.', url: phone?('https://www.whitepages.com/phone/'+pq):('https://www.whitepages.com/name/'+qq), entityType:'unknown', confidence:70, provenance:'Whitepages handoff', publicOnly:true },
-    { id:'dir-yp', source:'Public Directory', title:'Yellow Pages: '+q, summary:'Public yellow-pages business listings (phones/addresses as published).', url:'https://www.yellowpages.com/search?search_terms='+qq, entityType:'organization', confidence:72, provenance:'Yellow Pages handoff', publicOnly:true },
-    { id:'dir-411', source:'Public Directory', title: phone?('411 reverse: '+phone):('411 directory: '+q), summary:'Directory-assistance style public reverse/name search.', url: phone?('https://www.411.com/reverse-phone/'+pq):('https://www.411.com/name/'+qq), entityType:'unknown', confidence:68, provenance:'411.com handoff', publicOnly:true },
-    { id:'dir-anywho', source:'Public Directory', title: phone?('AnyWho reverse: '+phone):('AnyWho: '+q), summary:'Public reverse-phone / name directory handoff.', url: phone?('https://www.anywho.com/reverse-phone-lookup/'+pq):('https://www.anywho.com/people/'+qq), entityType:'unknown', confidence:65, provenance:'AnyWho handoff', publicOnly:true },
-    { id:'dir-tps', source:'Public Directory', title: phone?('Public records phone search: '+phone):('Public records people search: '+q), summary:'Public-records people/phone aggregator used at news desks — verify every field.', url: phone?('https://www.truepeoplesearch.com/results?phoneno='+pq):('https://www.truepeoplesearch.com/results?name='+qq), entityType:'person', confidence:63, provenance:'TruePeopleSearch handoff', publicOnly:true }
-  );
-  sources.add('Public Directory');
-  try {
-    const osm = await fetchJsonClient('https://nominatim.openstreetmap.org/search?q='+qq+'&format=json&addressdetails=1&extratags=1&limit=5');
-    for (const [i,item] of (osm||[]).entries()) {
-      const phoneListed = (item.extratags&& (item.extratags.phone||item.extratags['contact:phone']))||'';
-      results.push({ id:'osm-'+item.osm_id, source:'Public Directory', title:(item.display_name||'').split(',')[0], summary:'OSM public listing'+(phoneListed?(' · listed phone '+phoneListed):''), url: item.extratags&&item.extratags.website || ('https://www.openstreetmap.org/'+(item.osm_type||'search')+'/'+(item.osm_id||'')), entityType:'organization', confidence: phoneListed?88-i*3:78-i*3, provenance:'OpenStreetMap Nominatim (live)', publicOnly:true });
-    }
-  } catch(e) {}
-  if (/411|white\s*pages|yellow\s*pages|phone\s*book|reverse\s*phone|directory|skip\s*trace/i.test(q) || phone) {
-    warnings.push('Public directory / 411 / reverse-listing mode: published listings and public-record people search handoffs. Leads only — verify primary sources.');
-  }
-
-return {
-    query:q, exactQuery:q, searchedAt:new Date().toISOString(), mode:/411|directory|business/i.test(q)?'business':'entity',
-    sources:[...sources], connectorStates, results, warnings
-  };
-}
-
-
-runSearch = async function() {
-  const q = $('#q').value.trim();
-  if (q.length < 2) return;
-  if (/(?:social security number|\bssn\b|credit\s*card|\bcvv\b|password|api[_ -]?key)/i.test(q)) {
-    $('#researchMeta').textContent = 'Blocked by policy';
-    $('#researchWarns').innerHTML = '<div class="warn">Credential / SSN / financial-account targeting is blocked. Public phone book, 411, and reverse-directory research is allowed.</div>';
-    return;
-  }
-  $('#researchMeta').textContent = 'Searching public sources…';
-  $('#researchGrid').innerHTML = '';
-  $('#researchWarns').innerHTML = '';
-  try {
-    const r = await fetch('/api/research/search?q=' + encodeURIComponent(q));
-    if (!r.ok) throw new Error('api '+r.status);
-    const j = await r.json();
-    if (!j.ok) throw new Error(j.error||'fail');
-    lastResearch = j.data;
-  } catch (e) {
-    lastResearch = await clientSideSearch(q);
-  }
-  const d = lastResearch;
-  $('#researchMeta').textContent = `${d.results.length} results for “${d.query}” · ${new Date(d.searchedAt).toLocaleString()} · ${(d.sources||[]).join(', ')}`;
-  $('#researchWarns').innerHTML = (d.warnings||[]).map(w => `<div class="warn">${escapeHtml(w)}</div>`).join('');
-  $('#researchGrid').innerHTML = d.results.map(card).join('') || '<div class="muted">No matches.</div>';
-  renderAnalysis();
-};
-
-checkHealth();
-setInterval(checkHealth, 30000);
-// deep-link ?view=
-const params = new URLSearchParams(location.search);
-if (params.get("view") && titles[params.get("view")]) setView(params.get("view"));
-if (params.get("q")) { $("#q").value = params.get("q"); setView("research"); runSearch(); }
-</script>
-</body>
-</html>
+<!DOCTYPE html><html  lang="en"><head><title data-rh="true"></title><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><style id="expo-reset">#root,body,html{height:100%}body{overflow:hidden}#root{display:flex}</style><style id="react-native-stylesheet">[stylesheet-group="0"]{}
+body{margin:0;}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0;}
+html{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-webkit-search-results-button,input::-webkit-search-results-decoration{display:none;}
+[stylesheet-group="1"]{}
+.css-11aywtz{-moz-appearance:textfield;-webkit-appearance:none;background-color:rgba(0,0,0,0.00);border-bottom-left-radius:0px;border-bottom-right-radius:0px;border-top-left-radius:0px;border-top-right-radius:0px;border:0 solid black;box-sizing:border-box;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0px;padding:0px;resize:none;}
+.css-146c3p1{background-color:rgba(0,0,0,0.00);border:0 solid black;box-sizing:border-box;color:rgba(0,0,0,1.00);display:inline;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;list-style:none;margin:0px;padding:0px;position:relative;text-align:start;text-decoration:none;white-space:pre-wrap;word-wrap:break-word;}
+.css-1jxf684{background-color:rgba(0,0,0,0.00);border:0 solid black;box-sizing:border-box;color:inherit;display:inline;font:inherit;list-style:none;margin:0px;padding:0px;position:relative;text-align:inherit;text-decoration:none;white-space:inherit;word-wrap:break-word;}
+.css-9pa8cd{bottom:0px;height:100%;left:0px;opacity:0;position:absolute;right:0px;top:0px;width:100%;z-index:-1;}
+.css-g5y9jx{align-content:flex-start;align-items:stretch;background-color:rgba(0,0,0,0.00);border:0 solid black;box-sizing:border-box;display:flex;flex-basis:auto;flex-direction:column;flex-shrink:0;list-style:none;margin:0px;min-height:0px;min-width:0px;padding:0px;position:relative;text-decoration:none;z-index:0;}
+[stylesheet-group="2"]{}
+.r-11mg6pl{border-bottom-color:rgba(255,255,255,1.00);border-left-color:rgba(255,255,255,1.00);border-right-color:rgba(255,255,255,1.00);border-top-color:rgba(255,255,255,1.00);}
+.r-13awgt0{flex:1;}
+.r-14veiml{border-bottom-color:rgba(9,13,22,1.00);border-left-color:rgba(9,13,22,1.00);border-right-color:rgba(9,13,22,1.00);border-top-color:rgba(9,13,22,1.00);}
+.r-16ftx22{border-bottom-color:rgba(167,139,250,0.27);border-left-color:rgba(167,139,250,0.27);border-right-color:rgba(167,139,250,0.27);border-top-color:rgba(167,139,250,0.27);}
+.r-16uyjmq{border-bottom-left-radius:22px;border-bottom-right-radius:22px;border-top-left-radius:22px;border-top-right-radius:22px;}
+.r-1867qdf{border-bottom-left-radius:16px;border-bottom-right-radius:16px;border-top-left-radius:16px;border-top-right-radius:16px;}
+.r-18c69zk{border-bottom-left-radius:100px;border-bottom-right-radius:100px;border-top-left-radius:100px;border-top-right-radius:100px;}
+.r-1awa8pu{border-bottom-color:rgba(101,119,134,1.00);border-left-color:rgba(101,119,134,1.00);border-right-color:rgba(101,119,134,1.00);border-top-color:rgba(101,119,134,1.00);}
+.r-1bq2mok{margin:3px;}
+.r-1d4xg89{border-bottom-color:rgba(170,184,194,1.00);border-left-color:rgba(170,184,194,1.00);border-right-color:rgba(170,184,194,1.00);border-top-color:rgba(170,184,194,1.00);}
+.r-1d6rzhh{border-bottom-width:3px;border-left-width:3px;border-right-width:3px;border-top-width:3px;}
+.r-1dzdj1l{border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;}
+.r-1f0042m{border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:5px;border-top-right-radius:5px;}
+.r-1j16mh1{border-bottom-left-radius:100%;border-bottom-right-radius:100%;border-top-left-radius:100%;border-top-right-radius:100%;}
+.r-1jkafct{border-bottom-left-radius:2px;border-bottom-right-radius:2px;border-top-left-radius:2px;border-top-right-radius:2px;}
+.r-1jyn79y{border-bottom-color:rgba(0,150,136,1.00);border-left-color:rgba(0,150,136,1.00);border-right-color:rgba(0,150,136,1.00);border-top-color:rgba(0,150,136,1.00);}
+.r-1l4n1ga{border-bottom-left-radius:250px;border-bottom-right-radius:250px;border-top-left-radius:250px;border-top-right-radius:250px;}
+.r-1mxhqmb{border-bottom-left-radius:11px;border-bottom-right-radius:11px;border-top-left-radius:11px;border-top-right-radius:11px;}
+.r-1pcd2l5{padding:20px;}
+.r-1phboty{border-bottom-style:solid;border-left-style:solid;border-right-style:solid;border-top-style:solid;}
+.r-1px6drs{border-bottom-left-radius:7px;border-bottom-right-radius:7px;border-top-left-radius:7px;border-top-right-radius:7px;}
+.r-1q9bdsx{border-bottom-left-radius:12px;border-bottom-right-radius:12px;border-top-left-radius:12px;border-top-right-radius:12px;}
+.r-1qsk4np{overflow-x:clip;overflow-y:clip;}
+.r-1rvyss1{border-bottom-color:rgba(255,255,255,0.20);border-left-color:rgba(255,255,255,0.20);border-right-color:rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.20);}
+.r-1rznh0w{border-bottom-color:rgba(167,139,250,0.40);border-left-color:rgba(167,139,250,0.40);border-right-color:rgba(167,139,250,0.40);border-top-color:rgba(167,139,250,0.40);}
+.r-1sbahrg{padding:28px;}
+.r-1sp51qo{padding:10px;}
+.r-1tfugtt{border-bottom-color:rgba(53,224,208,0.27);border-left-color:rgba(53,224,208,0.27);border-right-color:rgba(53,224,208,0.27);border-top-color:rgba(53,224,208,0.27);}
+.r-1twy9q3{border-bottom-color:rgba(167,139,250,0.33);border-left-color:rgba(167,139,250,0.33);border-right-color:rgba(167,139,250,0.33);border-top-color:rgba(167,139,250,0.33);}
+.r-1txcine{border-bottom-left-radius:13px;border-bottom-right-radius:13px;border-top-left-radius:13px;border-top-right-radius:13px;}
+.r-1udh08x{overflow-x:hidden;overflow-y:hidden;}
+.r-1uu6nss{padding:5px;}
+.r-1v3al92{border-bottom-color:rgba(53,224,208,0.40);border-left-color:rgba(53,224,208,0.40);border-right-color:rgba(53,224,208,0.40);border-top-color:rgba(53,224,208,0.40);}
+.r-1xfd6ze{border-bottom-left-radius:8px;border-bottom-right-radius:8px;border-top-left-radius:8px;border-top-right-radius:8px;}
+.r-1ylenci{border-bottom-left-radius:15px;border-bottom-right-radius:15px;border-top-left-radius:15px;border-top-right-radius:15px;}
+.r-46smdq{border-bottom-color:rgba(251,113,133,0.33);border-left-color:rgba(251,113,133,0.33);border-right-color:rgba(251,113,133,0.33);border-top-color:rgba(251,113,133,0.33);}
+.r-4a18lf{border-bottom-color:rgba(255,0,0,1.00);border-left-color:rgba(255,0,0,1.00);border-right-color:rgba(255,0,0,1.00);border-top-color:rgba(255,0,0,1.00);}
+.r-4a70lj{border-bottom-color:rgba(167,139,250,0.15);border-left-color:rgba(167,139,250,0.15);border-right-color:rgba(167,139,250,0.15);border-top-color:rgba(167,139,250,0.15);}
+.r-5t7aoe{border-bottom-left-radius:17px;border-bottom-right-radius:17px;border-top-left-radius:17px;border-top-right-radius:17px;}
+.r-60ke3l{border-bottom-color:rgba(0,128,0,1.00);border-left-color:rgba(0,128,0,1.00);border-right-color:rgba(0,128,0,1.00);border-top-color:rgba(0,128,0,1.00);}
+.r-6ncur5{border-bottom-left-radius:18px;border-bottom-right-radius:18px;border-top-left-radius:18px;border-top-right-radius:18px;}
+.r-6t2glc{border-bottom-left-radius:40px;border-bottom-right-radius:40px;border-top-left-radius:40px;border-top-right-radius:40px;}
+.r-7lg51g{border-bottom-color:rgba(53,224,208,0.12);border-left-color:rgba(53,224,208,0.12);border-right-color:rgba(53,224,208,0.12);border-top-color:rgba(53,224,208,0.12);}
+.r-9x6qib{border-bottom-color:rgba(204,214,221,1.00);border-left-color:rgba(204,214,221,1.00);border-right-color:rgba(204,214,221,1.00);border-top-color:rgba(204,214,221,1.00);}
+.r-bztko3{overflow-x:visible;overflow-y:visible;}
+.r-crgep1{margin:0px;}
+.r-d045u9{border-bottom-width:2px;border-left-width:2px;border-right-width:2px;border-top-width:2px;}
+.r-d23pfw{padding:24px;}
+.r-d26pyy{border-bottom-color:rgba(36,49,70,1.00);border-left-color:rgba(36,49,70,1.00);border-right-color:rgba(36,49,70,1.00);border-top-color:rgba(36,49,70,1.00);}
+.r-e65kyq{padding:30px;}
+.r-edyy15{padding:8px;}
+.r-fx7oqy{border-bottom-color:rgba(0,0,255,1.00);border-left-color:rgba(0,0,255,1.00);border-right-color:rgba(0,0,255,1.00);border-top-color:rgba(0,0,255,1.00);}
+.r-kdyh1x{border-bottom-left-radius:6px;border-bottom-right-radius:6px;border-top-left-radius:6px;border-top-right-radius:6px;}
+.r-kq9wsh{padding:13px;}
+.r-krxsd3{display:-webkit-box;}
+.r-moea7m{border-bottom-color:rgba(36,49,70,0.47);border-left-color:rgba(36,49,70,0.47);border-right-color:rgba(36,49,70,0.47);border-top-color:rgba(36,49,70,0.47);}
+.r-nsbfu8{padding:16px;}
+.r-q81ovl{padding:11px;}
+.r-qgi43r{padding:17px;}
+.r-rr86jz{border-bottom-color:rgba(251,191,36,0.33);border-left-color:rgba(251,191,36,0.33);border-right-color:rgba(251,191,36,0.33);border-top-color:rgba(251,191,36,0.33);}
+.r-rs99b7{border-bottom-width:1px;border-left-width:1px;border-right-width:1px;border-top-width:1px;}
+.r-s88bda{display:contents;}
+.r-t23y2h{border-bottom-left-radius:14px;border-bottom-right-radius:14px;border-top-left-radius:14px;border-top-right-radius:14px;}
+.r-t60dpp{padding:0px;}
+.r-w7mnv7{border-bottom-color:rgba(53,224,208,0.33);border-left-color:rgba(53,224,208,0.33);border-right-color:rgba(53,224,208,0.33);border-top-color:rgba(53,224,208,0.33);}
+.r-wg31gx{border-bottom-color:rgba(49,53,56,1.00);border-left-color:rgba(49,53,56,1.00);border-right-color:rgba(49,53,56,1.00);border-top-color:rgba(49,53,56,1.00);}
+.r-xoduu5{display:inline-flex;}
+.r-xyw6el{padding:12px;}
+.r-y47klf{border-bottom-left-radius:20px;border-bottom-right-radius:20px;border-top-left-radius:20px;border-top-right-radius:20px;}
+.r-ywje51{margin:auto;}
+.r-z2wwpe{border-bottom-left-radius:4px;border-bottom-right-radius:4px;border-top-left-radius:4px;border-top-right-radius:4px;}
+[stylesheet-group="2.1"]{}
+.r-11f147o{padding-bottom:8px;padding-top:8px;}
+.r-11gswi8{padding-left:3px;padding-right:3px;}
+.r-1559e4e{padding-bottom:2px;padding-top:2px;}
+.r-17q4wm6{margin-left:5px;margin-right:5px;}
+.r-184id4b{margin-bottom:12px;margin-top:12px;}
+.r-1d7mnkm{padding-bottom:15px;padding-top:15px;}
+.r-1e084wi{padding-left:0px;padding-right:0px;}
+.r-1ezpcd1{padding-left:9px;padding-right:9px;}
+.r-1m1l54l{padding-left:11px;padding-right:11px;}
+.r-1mmae3n{padding-bottom:12px;padding-top:12px;}
+.r-1nmahqa{margin-left:21px;margin-right:21px;}
+.r-1ntr0p{padding-left:5px;padding-right:5px;}
+.r-1rsorjc{padding-left:36px;padding-right:36px;}
+.r-1s5swlz{padding-bottom:9px;padding-top:9px;}
+.r-1yd117h{padding-bottom:7px;padding-top:7px;}
+.r-284m6k{padding-left:18px;padding-right:18px;}
+.r-3o4zer{padding-left:12px;padding-right:12px;}
+.r-3pj75a{padding-left:16px;padding-right:16px;}
+.r-bhtmuz{margin-left:20px;margin-right:20px;}
+.r-c6ipad{padding-left:7px;padding-right:7px;}
+.r-cnw61z{padding-bottom:4px;padding-top:4px;}
+.r-cxgwc0{padding-left:24px;padding-right:24px;}
+.r-f8sm7e{margin-left:auto;margin-right:auto;}
+.r-gu64tb{padding-left:14px;padding-right:14px;}
+.r-is05cd{padding-left:8px;padding-right:8px;}
+.r-jdiy1a{margin-left:11px;margin-right:11px;}
+.r-jusfrs{margin-left:12px;margin-right:12px;}
+.r-kritb0{padding-bottom:11px;padding-top:11px;}
+.r-lgtrmy{padding-bottom:19px;padding-top:19px;}
+.r-n5f61p{margin-bottom:3px;margin-top:3px;}
+.r-n7gxbd{padding-left:4px;padding-right:4px;}
+.r-ojzupr{margin-bottom:17px;margin-top:17px;}
+.r-rehuqn{padding-bottom:5px;padding-top:5px;}
+.r-u9wvl5{padding-left:20px;padding-right:20px;}
+.r-ugi1tw{padding-left:5%;padding-right:5%;}
+.r-w7s2jr{padding-bottom:16px;padding-top:16px;}
+.r-xjggfu{padding-bottom:3px;padding-top:3px;}
+.r-ytbthy{padding-bottom:10px;padding-top:10px;}
+[stylesheet-group="2.2"]{}
+.r-10s2tm5{left:0%;}
+.r-16o8guy{right:100%;}
+.r-1a11zyx{margin-right:12px;}
+.r-1cwvpvk{margin-left:12px;}
+.r-1e97lx8{margin-right:3px;}
+.r-1euzeng{padding-left:24px;}
+.r-1g4tz6n{margin-right:-14.5px;}
+.r-1h31txp{padding-right:16px;}
+.r-1lhn9r{margin-left:-14.5px;}
+.r-1sqnqi2{margin-left:3px;}
+.r-1vl2501{padding-right:24px;}
+.r-9mo606{margin-right:10px;}
+.r-c59us2{left:-3px;}
+.r-dqe1q{right:0%;}
+.r-qb41rp{margin-right:5px;}
+.r-rci37q{left:100%;}
+.r-uhung1{margin-left:10px;}
+.r-vpmibe{right:-3px;}
+.r-w67my2{padding-left:16px;}
+.r-wizibn{margin-left:5px;}
+[stylesheet-group="3"]{}
+.r-100vyta{margin-top:7px;}
+.r-105ug2t{pointer-events:auto!important;}
+.r-109y4c4{height:1px;}
+.r-10b5y5f{letter-spacing:1.4px;}
+.r-10ptun7{height:16px;}
+.r-10v3vxq{transform:scaleX(-1);}
+.r-10x49cs{font-size:10px;}
+.r-10xqauy{padding-top:env(safe-area-inset-top);}
+.r-11j9u27{visibility:hidden;}
+.r-11mo1y0{margin-bottom:7px;}
+.r-11mpjr4{background-color:rgba(223,223,223,1.00);}
+.r-11oscg{background-color:rgba(17,24,39,1.00);}
+.r-11rk87y{padding-bottom:32px;}
+.r-11udlyb{background-color:rgba(0,150,136,1.00);}
+.r-11v9fek{min-width:180px;}
+.r-11yh6sk{overflow-x:hidden;}
+.r-1233cax{transform:rotate(55deg);}
+.r-12f6czt{top:17px;}
+.r-12oupvq{transform:rotate(25deg);}
+.r-12ubb6f{margin-left:-6px;}
+.r-12upozd{max-width:280px;}
+.r-12vffkv>* {pointer-events:auto;}
+.r-12vffkv{pointer-events:none!important;}
+.r-12zb1j4{margin-right:7px;}
+.r-131miar{padding-top:18px;}
+.r-135wba7{line-height:24px;}
+.r-13aq9py{animation-name:r-1iq689l;}
+.r-13e2gs4{left:29%;}
+.r-13qz1uu{width:100%;}
+.r-13tjlyg{transition-duration:0.1s;}
+.r-1444osr{margin-top:18px;}
+.r-1472mwg{height:24px;}
+.r-14g73ha{height:15px;}
+.r-14gqq1x{margin-top:4px;}
+.r-14lw9ot{background-color:rgba(255,255,255,1.00);}
+.r-14sbq61{background-color:rgba(33,150,243,1.00);}
+.r-14uokdj{background-color:rgba(16,28,42,1.00);}
+.r-14yzgew{line-height:18px;}
+.r-150rngu{-webkit-overflow-scrolling:touch;}
+.r-156q2ks{margin-top:10px;}
+.r-1599tul{gap:3px;}
+.r-15d164r{margin-bottom:10px;}
+.r-15fybeb{color:rgba(253,164,175,1.00);}
+.r-15yy1ma{transform:rotate(27deg);}
+.r-15zivkp{margin-bottom:4px;}
+.r-16vweyc{background-color:rgba(38,52,73,1.00);}
+.r-16y2uox{flex-grow:1;}
+.r-173mn98{align-self:flex-end;}
+.r-173mzie{transform:scaleY(-1);}
+.r-173w5o{min-height:68px;}
+.r-1777fci{justify-content:center;}
+.r-17bb2tj{animation-duration:0.75s;}
+.r-17leim2{background-repeat:repeat;}
+.r-17s6mgv{justify-content:flex-end;}
+.r-17tb59b{opacity:0.7;}
+.r-17tloay{opacity:0.6;}
+.r-17u3ijr{background-color:rgba(155,161,166,0.27);}
+.r-17x6qj0{width:45%;}
+.r-184en5c{z-index:1;}
+.r-18nhz7w{top:-3px;}
+.r-18u1ve8{color:rgba(255,255,255,0.40);}
+.r-18u37iz{flex-direction:row;}
+.r-195fyg2{background-color:rgba(42,21,28,1.00);}
+.r-19oahor{font-size:64px;}
+.r-19qrga8{margin-top:3px;}
+.r-19r33im{letter-spacing:1.2px;}
+.r-19wmn03{width:20px;}
+.r-19z077z{touch-action:none;}
+.r-1a2p6p6{-webkit-text-decoration-style:solid;text-decoration-style:solid;}
+.r-1a8r3js{margin-bottom:11px;}
+.r-1abnn5w{animation-play-state:paused;}
+.r-1acpoxo{width:36px;}
+.r-1aiqnjv{font-family:monospace,monospace;}
+.r-1akm30i{line-height:13px;}
+.r-1aockid{width:40px;}
+.r-1armvtb{font-size:8px;}
+.r-1as3g83{border-top-left-radius:5px;}
+.r-1awozwy{align-items:center;}
+.r-1ay1djp{animation-duration:1s;}
+.r-1b43r93{font-size:14px;}
+.r-1b6yd1w{font-size:19px;}
+.r-1b94p3d{width:15px;}
+.r-1b9bua6{padding-top:9px;}
+.r-1bkx17m{height:270px;}
+.r-1blvdjr{font-size:23px;}
+.r-1bseccx{bottom:17%;}
+.r-1bymd8e{margin-top:2px;}
+.r-1byouvs{letter-spacing:0.4px;}
+.r-1c6unfx{forced-color-adjust:none;}
+.r-1c85bru{width:270px;}
+.r-1cad53l{margin-bottom:14px;}
+.r-1cfo2ev{letter-spacing:1.7px;}
+.r-1cm7zt9{letter-spacing:0.7px;}
+.r-1cmwbt1{gap:8px;}
+.r-1cvj4g8{margin-top:1px;}
+.r-1cwl3u0{line-height:16px;}
+.r-1d2f490{left:0px;}
+.r-1d5kdc7{flex-direction:column-reverse;}
+.r-1ddef8g{-webkit-text-decoration-line:underline;text-decoration-line:underline;}
+.r-1dernwh{height:70%;}
+.r-1ei5mc7{cursor:inherit;}
+.r-1el8sus{min-height:72px;}
+.r-1enofrn{font-size:12px;}
+.r-1epti8c{background-color:rgba(53,224,208,0.53);}
+.r-1euja1d{margin-bottom:22px;}
+.r-1euycsn{flex-direction:row-reverse;}
+.r-1ewcgjf{box-shadow:0px 1px 3px rgba(0,0,0,0.5);}
+.r-1ey881g{gap:7px;}
+.r-1eze6wi{border-top-color:rgba(251,191,36,0.20);}
+.r-1f0cr8{transform:scale(0.98);}
+.r-1f529hi{line-height:14px;}
+.r-1f720gc{width:50%;}
+.r-1ff274t{text-align:right;}
+.r-1ffj0ar{background-color:rgba(0,0,0,0.40);}
+.r-1ftgome{opacity:0.76;}
+.r-1g80hic{opacity:0.8;}
+.r-1g94qm0{margin-top:5px;}
+.r-1ge9hsw{max-width:960px;}
+.r-1ghxqbu{font-variant:tabular-nums;}
+.r-1gkfh8e{font-size:11px;}
+.r-1gl6hgy{background-color:rgba(40,52,73,1.00);}
+.r-1gqxf1t{background-color:rgba(37,49,69,1.00);}
+.r-1gumw5q{top:12%;}
+.r-1h0z5md{justify-content:flex-start;}
+.r-1habvwh{align-items:flex-start;}
+.r-1hdehye{transform:rotate(-35deg);}
+.r-1i10wst{font-size:18px;}
+.r-1i6wzkk{-moz-transition-property:opacity;-webkit-transition-property:opacity;transition-property:opacity;}
+.r-1i71y14{gap:14px;}
+.r-1ifxtd0{margin-bottom:16px;}
+.r-1ii58gl{min-height:34px;}
+.r-1ikidpy{letter-spacing:0.5px;}
+.r-1iln25a{word-wrap:normal;}
+.r-1inkyih{font-size:17px;}
+.r-1iud9ad{left:23%;}
+.r-1iusvr4{flex-basis:0px;}
+.r-1janqcz{width:16px;}
+.r-1jg9483{width:8px;}
+.r-1jkjb{margin-left:8px;}
+.r-1kb76zh{margin-right:8px;}
+.r-1kfrs79{font-weight:600;}
+.r-1kihuf0{align-self:center;}
+.r-1kl1mp1{height:250px;}
+.r-1kvgv2h{background-color:rgba(167,139,250,0.09);}
+.r-1l6i3fd{box-shadow:0px 0px 12px rgba(0,0,0,0.80);}
+.r-1ld3bg{top:-4px;}
+.r-1ldzwu0{animation-timing-function:linear;}
+.r-1loqt21{cursor:pointer;}
+.r-1lulw6t{background-color:rgba(53,224,208,0.09);}
+.r-1m7hjod{height:31px;}
+.r-1mdbics{height:43px;}
+.r-1mhb1uw{width:42px;}
+.r-1mi0q7o{padding-bottom:10px;}
+.r-1mlwlqe{flex-basis:auto;}
+.r-1mmz0bi{color:rgba(53,224,208,0.80);}
+.r-1mrlafo{background-position:0;}
+.r-1muvv40{animation-iteration-count:infinite;}
+.r-1niwhzg{background-color:rgba(0,0,0,0.00);}
+.r-1nky6gw{top:42%;}
+.r-1nlw0im{bottom:8px;}
+.r-1no09lo{margin-top:28px;}
+.r-1nrc83j{min-height:38px;}
+.r-1nxhmzv{margin-bottom:28px;}
+.r-1ny4l3l{outline-style:none;}
+.r-1o9r03r{bottom:11px;}
+.r-1ocf4r9{scroll-snap-type:y mandatory;}
+.r-1onu96p{border-curve:continuous;}
+.r-1oszu61{align-items:stretch;}
+.r-1otgn73{touch-action:manipulation;}
+.r-1ozsyd3{height:7px;}
+.r-1p0dtai{bottom:0px;}
+.r-1pcdyqj{margin-right:6px;}
+.r-1pi2tsx{height:100%;}
+.r-1pkxq1k{background-color:rgba(167,139,250,0.05);}
+.r-1pl7oy7{min-height:48px;}
+.r-1pm8pkb{font-family:Courier;}
+.r-1q2aiam{top:41%;}
+.r-1q67n59{letter-spacing:1.3px;}
+.r-1qd0xha{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+.r-1qsllxk{color:rgba(53,224,208,1.00);}
+.r-1qulhi1{animation-name:r-1pzkwqh;}
+.r-1qxgc49{padding-top:15px;}
+.r-1r1s7mt{letter-spacing:0.25px;}
+.r-1r4fvd0{color:rgba(82,169,255,1.00);}
+.r-1r4xee{top:51%;}
+.r-1r74h94{left:8px;}
+.r-1r8g8re{height:36px;}
+.r-1rbehv7{background-color:rgba(53,224,208,1.00);}
+.r-1rj9ium{transform:rotate(57deg);}
+.r-1rnoaur{overflow-y:auto;}
+.r-1s2bzr4{margin-top:12px;}
+.r-1s367qj{gap:11px;}
+.r-1sg8ghl{z-index:1000;}
+.r-1smd7e2{letter-spacing:0.8px;}
+.r-1ssbvtb{gap:12px;}
+.r-1sxrcry{background-size:auto;}
+.r-1t2hasf{padding-bottom:18px;}
+.r-1t9nq9{color:rgba(248,250,252,1.00);}
+.r-1udbk01{text-overflow:ellipsis;}
+.r-1ui5ee8{font-size:32px;}
+.r-1uopjct{height:37px;}
+.r-1ut7uwi{margin-top:-3px;}
+.r-1vb7srs{background-color:rgba(251,191,36,0.53);}
+.r-1vmzwxe{left:27%;}
+.r-1vr29t4{font-weight:800;}
+.r-1vsu8ta{min-height:30px;}
+.r-1w6e6rj{flex-wrap:wrap;}
+.r-1wbh5a2{flex-shrink:1;}
+.r-1wtj0ep{justify-content:space-between;}
+.r-1wyvozj{left:50%;}
+.r-1wyyakw{z-index:-1;}
+.r-1wzrnnt{margin-top:16px;}
+.r-1x5g5r8{margin-left:-7px;}
+.r-1x66iry{min-height:92px;}
+.r-1xbve24{height:6px;}
+.r-1xcajam{position:fixed;}
+.r-1xnzce8{-moz-user-select:text;-webkit-user-select:text;user-select:text;}
+.r-1xpsq9i{box-shadow:0px 3px 3px rgba(0, 0, 0, 0.33);}
+.r-1xzupcd{width:13px;}
+.r-1y00bll{gap:9px;}
+.r-1y566p8{width:37px;}
+.r-1yef0xd{animation-name:r-11cv4x;}
+.r-1yvhtrz{width:32px;}
+.r-249f41{left:10%;}
+.r-2eszeu::-webkit-scrollbar{display:none}
+.r-2eszeu{scrollbar-width:none;}
+.r-30o5oe{-moz-appearance:none;-ms-appearance:none;-webkit-appearance:none;appearance:none;}
+.r-32kosx{margin-left:-125px;}
+.r-33xeb2{background-color:rgba(12,20,32,1.00);}
+.r-356f0p{letter-spacing:0.35px;}
+.r-3da1kt{height:8px;}
+.r-3mc0re{right:8px;}
+.r-3s2u2q{white-space:nowrap;}
+.r-417010{z-index:0;}
+.r-4gszlv{background-size:cover;}
+.r-4m99jg{max-width:320px;}
+.r-4v7adb{height:5px;}
+.r-580adz{gap:5px;}
+.r-5fcqz0{line-height:17px;}
+.r-5kkj8d{border-top-width:1px;}
+.r-5n0r3u{right:10%;}
+.r-5orghg{width:34px;}
+.r-5oul0u{margin-bottom:8px;}
+.r-5vf7qs{width:188px;}
+.r-5xczd7{transform:scale(0.99);}
+.r-60vfwk{min-width:1px;}
+.r-633pao>* {pointer-events:none;}
+.r-633pao{pointer-events:none!important;}
+.r-6dt33c{opacity:1;}
+.r-6gpygo{margin-bottom:12px;}
+.r-6taxm2:-ms-input-placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-6taxm2::-moz-placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-6taxm2::-webkit-input-placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-6taxm2::placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-726pan{width:31px;}
+.r-76blku{height:21px;}
+.r-7cikom{font-size:inherit;}
+.r-7q8q6z{cursor:default;}
+.r-84ji2h{max-width:330px;}
+.r-8akbws{-webkit-box-orient:vertical;}
+.r-8ay8q1{letter-spacing:0.1px;}
+.r-8hc5te{width:6px;}
+.r-8iq6g1{width:52%;}
+.r-8rbrzk{min-width:54px;}
+.r-8wk47w{background-color:rgba(12,23,34,1.00);}
+.r-95jzfe{padding-top:16px;}
+.r-97e31f{padding-bottom:env(safe-area-inset-bottom);}
+.r-97wbjc{margin-left:11px;}
+.r-9aw3ui{gap:4px;}
+.r-9daxd3{animation-duration:250ms;}
+.r-9nuelm{left:24%;}
+.r-9y23iv{background-color:rgba(53,224,208,0.27);}
+.r-a023e6{font-size:15px;}
+.r-a1ub67{margin-top:11px;}
+.r-a4xqn0{background-color:rgba(23,22,42,1.00);}
+.r-a5pmau{margin-right:2px;}
+.r-admmdt{margin-top:-7px;}
+.r-adyw6z{font-size:20px;}
+.r-afbznj{letter-spacing:-0.2px;}
+.r-agouwx{transform:translateZ(0);}
+.r-ah5dr5>* {pointer-events:none;}
+.r-ah5dr5{pointer-events:auto!important;}
+.r-aruset{font-weight:200;}
+.r-axlblu{font-size:29px;}
+.r-b1jxyg{width:158px;}
+.r-b1yau9{letter-spacing:-0.7px;}
+.r-b88u0q{font-weight:700;}
+.r-bddxxz{color:rgba(147,164,184,1.00);}
+.r-bi4vy9{transform:translateY(100%);}
+.r-bmz6b9{margin-left:-79px;}
+.r-bnwqim{position:relative;}
+.r-bt1l66{min-height:20px;}
+.r-buy8e9{overflow-y:hidden;}
+.r-bv2aro{padding-left:env(safe-area-inset-left);}
+.r-c5k52v{color:rgba(167,139,250,1.00);}
+.r-c68hjy{color:rgba(161,161,161,1.00);}
+.r-cn9v4x{border-bottom-color:rgba(36,49,70,1.00);}
+.r-cpa5s6{scroll-snap-align:start;}
+.r-cqee49{color:rgba(0,0,0,1.00);}
+.r-df896w{max-width:92%;}
+.r-dfe81l{min-height:46px;}
+.r-dfv94e{border-top-right-radius:5px;}
+.r-dkge59{background-color:rgba(170,184,194,1.00);}
+.r-dnmrzs{max-width:100%;}
+.r-dw1azy{top:44%;}
+.r-e1k2in{right:16px;}
+.r-eafdt9{transition-duration:0.15s;}
+.r-ebwn4k{animation-name:r-q67da2;}
+.r-ehq7j7{background-size:contain;}
+.r-ejscvd{width:47%;}
+.r-ento23{top:62%;}
+.r-eqz5dr{flex-direction:column;}
+.r-eu3ka{height:40px;}
+.r-fdjqy7{text-align:left;}
+.r-fxxt2n{line-height:15px;}
+.r-g3mlsw{animation-name:r-t2lo5v;}
+.r-ghxds0{transform:translateY(0%);}
+.r-gjes6i{background-color:rgba(251,113,133,0.47);}
+.r-gtdqiz{position:-webkit-sticky;position:sticky;}
+.r-h0d30l{height:28px;}
+.r-h1js2l{font-size:25px;}
+.r-hoagvg{transform:rotate(-18deg);}
+.r-hxarbt{margin-bottom:9px;}
+.r-hxflta{padding-right:env(safe-area-inset-right);}
+.r-i933xg{letter-spacing:1.5px;}
+.r-icoktb{opacity:0.5;}
+.r-ig955{padding-bottom:13px;}
+.r-ipm5af{top:0px;}
+.r-iwe0bs{background-color:rgba(167,139,250,1.00);}
+.r-jjj96k{border-top-color:rgba(36,49,70,1.00);}
+.r-jwli3a{color:rgba(255,255,255,1.00);}
+.r-k200y{align-self:flex-start;}
+.r-kc8jnq{margin-top:6px;}
+.r-kemksi{background-color:rgba(0,0,0,1.00);}
+.r-kijots{transform:rotate(-17deg);}
+.r-kizejy{color:rgba(155,161,166,1.00);}
+.r-knv0ih{margin-top:8px;}
+.r-ku1wi2{margin-bottom:15px;}
+.r-kzbkwu{padding-bottom:12px;}
+.r-l71dzp{margin-top:14px;}
+.r-le4sbl{margin-bottom:18px;}
+.r-leqjx2{animation-timing-function:cubic-bezier(0.215, 0.61, 0.355, 1);}
+.r-lltvgl{overflow-x:auto;}
+.r-lpb231{height:168px;}
+.r-lrsllp{width:24px;}
+.r-lrvibr{-moz-user-select:none;-webkit-user-select:none;user-select:none;}
+.r-lsa89y{opacity:0.75;}
+.r-m611by{padding-top:10px;}
+.r-mabqd8{height:32px;}
+.r-majxgm{font-weight:500;}
+.r-mfh4gg{scroll-snap-type:x mandatory;}
+.r-mhe3cw{z-index:10;}
+.r-mk5der{background-color:rgba(53,224,208,0.07);}
+.r-ml9okn{margin-top:17px;}
+.r-mro3nb{background-color:rgba(21,23,24,1.00);}
+.r-n6dd6i{background-color:rgba(37,31,18,1.00);}
+.r-n6v787{font-size:13px;}
+.r-n7ken7{border-top-color:rgba(53,224,208,0.12);}
+.r-naei0s{background-color:rgba(14,37,42,1.00);}
+.r-ndvcnb{border-bottom-width:0px;}
+.r-nrx7h9{box-shadow:0px 0px 10px rgba(0,0,0,0.60);}
+.r-nw7b81{background-color:rgba(16,43,49,1.00);}
+.r-o4n3w5{width:23px;}
+.r-obd0qt{align-items:flex-end;}
+.r-oid0yz{background-color:rgba(167,139,250,0.33);}
+.r-ojf8lh{gap:6px;}
+.r-orgf3d{opacity:0;}
+.r-ovu0ai{font-weight:900;}
+.r-p9zpus{background-color:rgba(167,139,250,0.60);}
+.r-q2ul4v{height:224px;}
+.r-q4m81j{text-align:center;}
+.r-qfi6ny{top:30000px;}
+.r-qklmqi{border-bottom-width:1px;}
+.r-qn3fzs{padding-bottom:24px;}
+.r-qqjak8{font-size:9px;}
+.r-qs2cmk{background-color:rgba(167,139,250,0.06);}
+.r-qsh3in{color:rgba(251,191,36,1.00);}
+.r-r5vmyo{z-index:1002;}
+.r-rabhyy{padding-bottom:28px;}
+.r-rjixqe{line-height:20px;}
+.r-rpnbwx{margin-top:13px;}
+.r-rs94m5{background-image:url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcKICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIgogICB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiCiAgIHhtbG5zOnN2Zz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgdmVyc2lvbj0iMS4xIgogICB2aWV3Qm94PSIwIDAgMSAxIgogICBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWluWU1pbiBtZWV0Ij4KICA8cGF0aAogICAgIGQ9Ik0gMC4wNDAzODA1OSwwLjYyNjc3NjcgMC4xNDY0NDY2MSwwLjUyMDcxMDY4IDAuNDI5Mjg5MzIsMC44MDM1NTMzOSAwLjMyMzIyMzMsMC45MDk2MTk0MSB6IE0gMC4yMTcxNTcyOSwwLjgwMzU1MzM5IDAuODUzNTUzMzksMC4xNjcxNTcyOSAwLjk1OTYxOTQxLDAuMjczMjIzMyAwLjMyMzIyMzMsMC45MDk2MTk0MSB6IgogICAgIGlkPSJyZWN0Mzc4MCIKICAgICBzdHlsZT0iZmlsbDojZmZmZmZmO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lIiAvPgo8L3N2Zz4K");}
+.r-s62m2j{animation-timing-function:cubic-bezier(0.47, 0, 0.745, 0.715);}
+.r-sfbmgh{z-index:9999;}
+.r-sgscqh{width:250px;}
+.r-so7y2g{line-height:64px;}
+.r-sw94s4{top:46%;}
+.r-tceitz{left:16px;}
+.r-tmvwmm{width:54%;}
+.r-tsynxw{text-transform:uppercase;}
+.r-u6sd8q{background-repeat:no-repeat;}
+.r-u8s1d{position:absolute;}
+.r-u92y06{background-color:rgba(255,165,0,1.00);}
+.r-uaa2di{gap:10px;}
+.r-ubezar{font-size:16px;}
+.r-ud0q2t{letter-spacing:1px;}
+.r-uho16t{font-size:34px;}
+.r-ur6pnr{height:42px;}
+.r-vacyoi{padding-bottom:64px;}
+.r-van48c{caret-color:transparent;}
+.r-vboj7i{top:-7px;}
+.r-vvn4in{background-position:center;}
+.r-vw2c0b{font-weight:bold;}
+.r-wfqgy4{transition-duration:100ms;}
+.r-wk8lta{padding-top:0px;}
+.r-ws9h79{left:4px;}
+.r-x11e5r{font-family:SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+.r-x3cy2q{background-size:100% 100%;}
+.r-xbgre3{border-bottom-color:rgba(36,49,70,0.60);}
+.r-xd6kpl{padding-bottom:8px;}
+.r-xe0v44{background-color:rgba(251,191,36,0.27);}
+.r-xn48z5{transform:scale(0.96);}
+.r-xx3c9p{animation-name:r-imtty0;}
+.r-y7v2we{background-color:rgba(32,36,37,1.00);}
+.r-yie26v{z-index:1001;}
+.r-z2qzgk{width:5px;}
+.r-z80fyv{height:20px;}
+.r-zchlnj{right:0px;}
+.r-zx9znk{height:34px;}
+.r-zz5t5d{font-size:28px;}
+.r-zz8wa8{bottom:14px;}
+@-webkit-keyframes r-11cv4x{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+@-webkit-keyframes r-1iq689l{0%{transform:translateY(0%);}100%{transform:translateY(100%);}}
+@-webkit-keyframes r-1pzkwqh{0%{transform:translateY(100%);}100%{transform:translateY(0%);}}
+@-webkit-keyframes r-imtty0{0%{opacity:0;}100%{opacity:1;}}
+@-webkit-keyframes r-q67da2{0%{transform:translateX(-100%);}100%{transform:translateX(400%);}}
+@-webkit-keyframes r-t2lo5v{0%{opacity:1;}100%{opacity:0;}}
+@keyframes r-11cv4x{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+@keyframes r-1iq689l{0%{transform:translateY(0%);}100%{transform:translateY(100%);}}
+@keyframes r-1pzkwqh{0%{transform:translateY(100%);}100%{transform:translateY(0%);}}
+@keyframes r-imtty0{0%{opacity:0;}100%{opacity:1;}}
+@keyframes r-q67da2{0%{transform:translateX(-100%);}100%{transform:translateX(400%);}}
+@keyframes r-t2lo5v{0%{opacity:1;}100%{opacity:0;}}</style><style id="expo-generated-fonts">@font-face{font-family:"material";src:url("/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.4e85bc9ebe07e0340c9c4fc2f6c38908.ttf");font-display:auto}</style><link rel="preload" href="/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.4e85bc9ebe07e0340c9c4fc2f6c38908.ttf" as="font" crossorigin="" /><script type="module">globalThis.__EXPO_ROUTER_HYDRATE__=true;</script><link rel="preload" href="/_expo/static/css/web-5ee4f55ced08d42b1db48a9e7e76537c.css" as="style">
+<link rel="stylesheet" href="/_expo/static/css/web-5ee4f55ced08d42b1db48a9e7e76537c.css"></head><body><div id="root"><div class="css-g5y9jx r-13awgt0"><!--$--><div class="css-g5y9jx" style="flex:1;--color-primary:#35E0D0;--color-background:#090D16;--color-surface:#111827;--color-foreground:#F8FAFC;--color-muted:#93A4B8;--color-border:#243146;--color-success:#35E0D0;--color-warning:#FBBF24;--color-error:#FB7185"><div class="css-g5y9jx r-13awgt0"><div class="css-g5y9jx" style="flex:1"><div style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;visibility:hidden"></div><div class="css-g5y9jx r-13awgt0"><div class="css-g5y9jx r-13awgt0 r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af" style="background-color:rgba(242,242,242,1.00);display:flex"><div class="css-g5y9jx r-13awgt0"><div class="css-g5y9jx r-13awgt0"><!--$--><div style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;visibility:hidden"></div><div class="css-g5y9jx r-13awgt0" style="flex-direction:column"><div class="css-g5y9jx r-13awgt0 r-1udh08x"><div class="css-g5y9jx r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af" style="z-index:0"><div class="css-g5y9jx r-13awgt0" style="background-color:rgba(242,242,242,1.00)"><div class="css-g5y9jx r-13awgt0"><!--$--><div class="css-g5y9jx flex-1 bg-background"><div class="css-g5y9jx flex-1" style="padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px"><div class="css-g5y9jx flex-1"><div class="css-g5y9jx r-150rngu r-eqz5dr r-16y2uox r-1wbh5a2 r-11yh6sk r-1rnoaur r-agouwx r-2eszeu"><div class="css-g5y9jx r-rabhyy"><div class="css-g5y9jx r-1habvwh r-18u37iz r-1wtj0ep r-1t2hasf r-u9wvl5 r-131miar"><div class="css-g5y9jx r-13awgt0 r-1h31txp"><div dir="auto" class="css-146c3p1 r-1qsllxk r-10x49cs r-1vr29t4 r-1cfo2ev r-11mo1y0">VERITAS / FIELD DESK</div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-axlblu r-1vr29t4 r-b1yau9">Good evening, Maya</div><div dir="auto" class="css-146c3p1 r-bddxxz r-n6v787 r-14yzgew r-kc8jnq r-84ji2h">Your case desk is quiet. The signal is not.</div></div><div aria-label="Open security status" tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-11oscg r-d26pyy r-t23y2h r-rs99b7 r-ur6pnr r-1777fci r-1mhb1uw"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:20px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div></div><div class="css-g5y9jx r-1awozwy r-11oscg r-w7mnv7 r-1ylenci r-rs99b7 r-18u37iz r-1cmwbt1 r-bhtmuz r-dfe81l r-3o4zer"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:19px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div><input placeholder="Search a person or business in public records" autoCapitalize="sentences" autoComplete="on" autoCorrect="on" dir="auto" enterKeyHint="search" rows="1" spellCheck="true" virtualkeyboardpolicy="auto" class="css-11aywtz r-6taxm2 r-1t9nq9 r-13awgt0 r-1gkfh8e" style="--placeholderTextColor:#93A4B8" value=""/><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1rbehv7 r-1dzdj1l r-1m7hjod r-1777fci r-726pan"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:18px;color:rgba(6,17,23,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-bddxxz r-qqjak8 r-15zivkp r-1nmahqa r-100vyta">Wikidata · SEC EDGAR · GDELT news · connected public posts</div><div class="css-g5y9jx r-y47klf r-rs99b7 r-naei0s r-w7mnv7 r-bhtmuz r-qgi43r"><div class="css-g5y9jx r-1habvwh r-18u37iz r-1wtj0ep"><div class="css-g5y9jx"><div dir="auto" class="css-146c3p1 r-1qsllxk r-qqjak8 r-ovu0ai r-i933xg">ACTIVE INVESTIGATION</div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1blvdjr r-1vr29t4 r-1g94qm0">Northstar Ledger</div></div><div class="css-g5y9jx r-1awozwy r-1tfugtt r-18c69zk r-rs99b7 r-18u37iz r-580adz r-rehuqn r-is05cd"><div class="css-g5y9jx r-1rbehv7 r-kdyh1x r-1xbve24 r-8hc5te"></div><div dir="auto" class="css-146c3p1 r-1qsllxk r-qqjak8 r-ovu0ai r-1smd7e2">LIVE</div></div></div><div dir="auto" class="css-146c3p1 r-bddxxz r-1enofrn r-14yzgew r-1s2bzr4 r-4m99jg">Follow the money trail across three shell entities and two public procurement records.</div><div class="css-g5y9jx r-18u37iz r-1wtj0ep r-11mo1y0 r-1444osr"><div dir="auto" class="css-146c3p1 r-bddxxz r-qqjak8 r-ovu0ai r-ud0q2t">CASE SIGNAL COVERAGE</div><div dir="auto" class="css-146c3p1 r-1qsllxk r-1gkfh8e r-ovu0ai">68<!-- -->%</div></div><div class="css-g5y9jx r-1gqxf1t r-1px6drs r-1ozsyd3 r-1udh08x"><div class="css-g5y9jx r-1rbehv7 r-1px6drs r-1pi2tsx" style="width:68%"></div></div><div class="css-g5y9jx r-18u37iz r-1wtj0ep r-156q2ks"><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs">Updated 2m ago</div><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs">Active / 14 days</div></div></div><div class="css-g5y9jx r-18u37iz r-1cmwbt1 r-ojzupr r-u9wvl5"><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-11oscg r-d26pyy r-1867qdf r-rs99b7 r-13awgt0 r-1ey881g r-1777fci r-1el8sus"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:20px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1gkfh8e r-b88u0q">New case</div></div><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-11oscg r-d26pyy r-1867qdf r-rs99b7 r-13awgt0 r-1ey881g r-1777fci r-1el8sus"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:20px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1gkfh8e r-b88u0q">Import</div></div><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-11oscg r-d26pyy r-1867qdf r-rs99b7 r-13awgt0 r-1ey881g r-1777fci r-1el8sus"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:20px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1gkfh8e r-b88u0q">View leads</div></div></div><div aria-label="Open global investigation map" tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-8wk47w r-1tfugtt r-16uyjmq r-rs99b7 r-1euja1d r-1udh08x"><div class="css-g5y9jx r-1habvwh r-18u37iz r-1wtj0ep r-3pj75a r-95jzfe"><div class="css-g5y9jx"><div dir="auto" class="css-146c3p1 r-1qsllxk r-qqjak8 r-ovu0ai r-10b5y5f">GLOBAL INVESTIGATION MAP</div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1inkyih r-1vr29t4 r-14gqq1x">Northstar network</div></div><div class="css-g5y9jx r-1awozwy r-mk5der r-1tfugtt r-18c69zk r-rs99b7 r-18u37iz r-580adz r-cnw61z r-c6ipad"><div class="css-g5y9jx r-1rbehv7 r-kdyh1x r-1xbve24 r-8hc5te"></div><div dir="auto" class="css-146c3p1 r-1qsllxk r-qqjak8 r-ovu0ai r-1cm7zt9">LIVE</div></div></div><div class="css-g5y9jx r-q2ul4v r-knv0ih r-1udh08x r-bnwqim"><div class="css-g5y9jx r-7lg51g r-1l4n1ga r-rs99b7 r-1kl1mp1 r-1wyvozj r-32kosx r-u8s1d r-ipm5af r-sgscqh"></div><div class="css-g5y9jx r-1l4n1ga r-rs99b7 r-1wyvozj r-u8s1d r-ipm5af r-4a70lj r-1kl1mp1 r-bmz6b9 r-b1jxyg"></div><div class="css-g5y9jx r-9y23iv r-109y4c4 r-1iud9ad r-u8s1d r-1nky6gw r-kijots r-tmvwmm"></div><div class="css-g5y9jx r-oid0yz r-109y4c4 r-1iud9ad r-u8s1d r-sw94s4 r-12oupvq r-tmvwmm"></div><div class="css-g5y9jx r-xe0v44 r-109y4c4 r-1vmzwxe r-u8s1d r-1nky6gw r-1233cax r-ejscvd"></div><div class="css-g5y9jx r-1awozwy r-1ylenci r-14g73ha r-1777fci r-1x5g5r8 r-admmdt r-u8s1d r-1b94p3d" style="box-shadow:0px 0px 0px rgba(53,224,208,1.00);left:50%;top:43%;background-color:rgba(53,224,208,1.00)"><div class="css-g5y9jx r-14lw9ot r-1f0042m r-4v7adb r-z2qzgk"></div></div><div class="css-g5y9jx r-1awozwy r-1ylenci r-14g73ha r-1777fci r-1x5g5r8 r-admmdt r-u8s1d r-1b94p3d" style="box-shadow:0px 0px 0px rgba(167,139,250,1.00);left:23%;top:25%;background-color:rgba(167,139,250,1.00)"><div class="css-g5y9jx r-14lw9ot r-1f0042m r-4v7adb r-z2qzgk"></div></div><div class="css-g5y9jx r-1awozwy r-1ylenci r-14g73ha r-1777fci r-1x5g5r8 r-admmdt r-u8s1d r-1b94p3d" style="box-shadow:0px 0px 0px rgba(251,191,36,1.00);left:76%;top:25%;background-color:rgba(251,191,36,1.00)"><div class="css-g5y9jx r-14lw9ot r-1f0042m r-4v7adb r-z2qzgk"></div></div><div class="css-g5y9jx r-1awozwy r-1ylenci r-14g73ha r-1777fci r-1x5g5r8 r-admmdt r-u8s1d r-1b94p3d" style="box-shadow:0px 0px 0px rgba(53,224,208,1.00);left:22%;top:72%;background-color:rgba(53,224,208,1.00)"><div class="css-g5y9jx r-14lw9ot r-1f0042m r-4v7adb r-z2qzgk"></div></div><div class="css-g5y9jx r-1awozwy r-1ylenci r-14g73ha r-1777fci r-1x5g5r8 r-admmdt r-u8s1d r-1b94p3d" style="box-shadow:0px 0px 0px rgba(244,114,182,1.00);left:78%;top:71%;background-color:rgba(244,114,182,1.00)"><div class="css-g5y9jx r-14lw9ot r-1f0042m r-4v7adb r-z2qzgk"></div></div><div class="css-g5y9jx r-n7ken7 r-5kkj8d r-zz8wa8 r-18u37iz r-1wtj0ep r-tceitz r-1b9bua6 r-u8s1d r-e1k2in"><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs r-b88u0q">5 entities</div><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs r-b88u0q">7 signals</div><div dir="auto" class="css-146c3p1 r-10x49cs r-b88u0q" style="color:rgba(251,191,36,1.00)">2 review</div></div></div></div><div class="css-g5y9jx r-18u37iz r-1cmwbt1 r-1euja1d r-u9wvl5"><div class="css-g5y9jx r-11oscg r-d26pyy r-1867qdf r-rs99b7 r-13awgt0 r-1x66iry r-kq9wsh"><div dir="auto" class="css-146c3p1 r-bddxxz r-qqjak8 r-1vr29t4 r-ud0q2t r-tsynxw">Sources</div><div dir="auto" class="css-146c3p1 r-h1js2l r-1vr29t4 r-knv0ih" style="color:rgba(53,224,208,1.00)">42</div><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs r-1cvj4g8">indexed</div></div><div class="css-g5y9jx r-11oscg r-d26pyy r-1867qdf r-rs99b7 r-13awgt0 r-1x66iry r-kq9wsh"><div dir="auto" class="css-146c3p1 r-bddxxz r-qqjak8 r-1vr29t4 r-ud0q2t r-tsynxw">Entities</div><div dir="auto" class="css-146c3p1 r-h1js2l r-1vr29t4 r-knv0ih" style="color:rgba(167,139,250,1.00)">18</div><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs r-1cvj4g8">linked</div></div><div class="css-g5y9jx r-11oscg r-d26pyy r-1867qdf r-rs99b7 r-13awgt0 r-1x66iry r-kq9wsh"><div dir="auto" class="css-146c3p1 r-bddxxz r-qqjak8 r-1vr29t4 r-ud0q2t r-tsynxw">Signals</div><div dir="auto" class="css-146c3p1 r-h1js2l r-1vr29t4 r-knv0ih" style="color:rgba(251,191,36,1.00)">7</div><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs r-1cvj4g8">to review</div></div></div><div class="css-g5y9jx r-1euja1d r-u9wvl5"><div class="css-g5y9jx r-1awozwy r-18u37iz r-1a8r3js r-1vsu8ta"><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz r-1cmwbt1"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:17px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-ubezar r-1vr29t4 r-afbznj">Signal feed</div></div><div dir="auto" class="css-146c3p1 r-bddxxz r-1gkfh8e r-b88u0q r-1byouvs r-12zb1j4">LIVE</div></div><div class="css-g5y9jx r-11oscg r-d26pyy r-y47klf r-rs99b7 r-nsbfu8 r-1559e4e r-gu64tb"><div class="css-g5y9jx r-1awozwy r-xbgre3 r-qklmqi r-18u37iz r-uaa2di r-173w5o"><div class="css-g5y9jx r-1awozwy r-1mxhqmb r-rs99b7 r-mabqd8 r-1777fci r-1yvhtrz" style="background-color:rgba(53,224,208,0.09);border-top-color:rgba(53,224,208,0.27);border-right-color:rgba(53,224,208,0.27);border-bottom-color:rgba(53,224,208,0.27);border-left-color:rgba(53,224,208,0.27)"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:16px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-13awgt0"><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1enofrn r-1vr29t4">Director overlap detected</div><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs r-14gqq1x">Northstar Marine ↔ Harbor Civic</div></div><div dir="auto" class="css-146c3p1 r-bddxxz r-qqjak8">2m ago</div></div><div class="css-g5y9jx r-1awozwy r-xbgre3 r-qklmqi r-18u37iz r-uaa2di r-173w5o"><div class="css-g5y9jx r-1awozwy r-1mxhqmb r-rs99b7 r-mabqd8 r-1777fci r-1yvhtrz" style="background-color:rgba(167,139,250,0.09);border-top-color:rgba(167,139,250,0.27);border-right-color:rgba(167,139,250,0.27);border-bottom-color:rgba(167,139,250,0.27);border-left-color:rgba(167,139,250,0.27)"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:16px;color:rgba(167,139,250,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-13awgt0"><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1enofrn r-1vr29t4">Payment cadence breaks pattern</div><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs r-14gqq1x">3 transfers before milestones</div></div><div dir="auto" class="css-146c3p1 r-bddxxz r-qqjak8">18m ago</div></div><div class="css-g5y9jx r-1awozwy r-xbgre3 r-18u37iz r-uaa2di r-173w5o r-ndvcnb"><div class="css-g5y9jx r-1awozwy r-1mxhqmb r-rs99b7 r-mabqd8 r-1777fci r-1yvhtrz" style="background-color:rgba(251,191,36,0.09);border-top-color:rgba(251,191,36,0.27);border-right-color:rgba(251,191,36,0.27);border-bottom-color:rgba(251,191,36,0.27);border-left-color:rgba(251,191,36,0.27)"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:16px;color:rgba(251,191,36,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-13awgt0"><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1enofrn r-1vr29t4">Consent review required</div><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs r-14gqq1x">Private contact export quarantined</div></div><div dir="auto" class="css-146c3p1 r-bddxxz r-qqjak8">1h ago</div></div></div></div><div class="css-g5y9jx r-1euja1d r-u9wvl5"><div class="css-g5y9jx r-1awozwy r-18u37iz r-1a8r3js r-1vsu8ta"><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz r-1cmwbt1"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:17px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-ubezar r-1vr29t4 r-afbznj">Copilot brief</div></div><div dir="auto" class="css-146c3p1 r-bddxxz r-1gkfh8e r-b88u0q r-1byouvs r-12zb1j4">ASSISTIVE</div></div><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73"><div class="css-g5y9jx r-y47klf r-rs99b7 r-nsbfu8 r-a4xqn0 r-1twy9q3"><div class="css-g5y9jx r-1habvwh r-18u37iz r-uaa2di"><div class="css-g5y9jx r-1awozwy r-1kvgv2h r-16ftx22 r-1txcine r-rs99b7 r-1r8g8re r-1777fci r-1acpoxo"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:18px;color:rgba(167,139,250,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-13awgt0"><div dir="auto" class="css-146c3p1 r-1t9nq9 r-n6v787 r-1vr29t4">One review item needs your attention</div><div dir="auto" class="css-146c3p1 r-bddxxz r-1gkfh8e r-5fcqz0 r-1g94qm0">“The private contact export should remain quarantined until consent is documented.”</div></div><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:20px;color:rgba(147,164,184,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-18u37iz r-1wtj0ep r-l71dzp"><div class="css-g5y9jx r-kdyh1x r-rs99b7 r-cnw61z r-c6ipad" style="border-top-color:rgba(167,139,250,0.27);border-right-color:rgba(167,139,250,0.27);border-bottom-color:rgba(167,139,250,0.27);border-left-color:rgba(167,139,250,0.27);background-color:rgba(167,139,250,0.05)"><div dir="auto" class="css-146c3p1 r-10x49cs r-b88u0q r-1r1s7mt" style="color:rgba(167,139,250,1.00)">HUMAN REVIEW</div></div><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs">96% context confidence</div></div><div class="css-g5y9jx r-1awozwy r-18u37iz r-1y00bll r-1s2bzr4"><div class="css-g5y9jx r-16vweyc r-1xfd6ze r-13awgt0 r-4v7adb r-1udh08x"><div class="css-g5y9jx r-1xfd6ze r-1pi2tsx" style="width:96%;background-color:rgba(167,139,250,1.00)"></div></div><div dir="auto" class="css-146c3p1 r-1gkfh8e r-ovu0ai r-1ff274t r-1y566p8" style="color:rgba(167,139,250,1.00)">96<!-- -->%</div></div></div></div></div><div class="css-g5y9jx r-1awozwy r-18u37iz r-ojf8lh r-1777fci r-1ut7uwi r-u9wvl5"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:15px;color:rgba(147,164,184,1.00);font-family:material;font-weight:normal;font-style:normal"></div><div dir="auto" class="css-146c3p1 r-bddxxz r-10x49cs">Local fixture workspace · no source data leaves this prototype</div></div></div></div></div></div></div><!--/$--></div></div></div></div><div class="css-g5y9jx r-1p0dtai r-zchlnj r-1d2f490" style="pointer-events:auto;border-right-color:rgba(216,216,216,1.00);border-bottom-color:rgba(216,216,216,1.00);border-left-color:rgba(216,216,216,1.00);padding-right:0px;padding-left:0px;padding-top:7px;padding-bottom:12px;height:70px;background-color:rgba(9,13,22,1.00);border-top-color:rgba(36,49,70,1.00);border-top-width:0.5px;transform:translateY(0px)"><div class="css-g5y9jx r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af r-633pao"></div><div role="tablist" class="css-g5y9jx r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/" role="tab" aria-selected="true" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(147,164,184,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(53,224,208,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:10px;font-weight:700;margin-top:1px">Briefing</div></a></div><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/vault" role="tab" aria-selected="false" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(147,164,184,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(147,164,184,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:10px;font-weight:700;margin-top:1px">Vault</div></a></div><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/analysis" role="tab" aria-selected="false" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(147,164,184,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(147,164,184,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:10px;font-weight:700;margin-top:1px">Signals</div></a></div><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/team" role="tab" aria-selected="false" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(53,224,208,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(147,164,184,1.00);font-family:material;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(147,164,184,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:10px;font-weight:700;margin-top:1px">Team</div></a></div></div></div></div><!--/$--></div></div></div></div></div></div></div><!--/$--></div></div><script src="/_expo/static/js/web/entry-9323cd4eb759f2fd0fa32d99aa13eb0d.js" defer></script>
+</body></html>
