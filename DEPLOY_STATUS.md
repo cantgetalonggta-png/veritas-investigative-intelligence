@@ -3,7 +3,7 @@
 ## Production live URL
 **https://cantgetalonggta-png.github.io/veritas-investigative-intelligence/**
 
-| Route | Status |
+| Route | Status (re-verified 2026-10-27 03:50 UTC) |
 |-------|--------|
 | `/` index | 200 |
 | `/search.html` | 200 |
@@ -11,32 +11,37 @@
 | `/analysis.html` | 200 |
 | `/team.html` | 200 |
 | `/vault.html` | 200 |
-| JS bundle + CSS | 200 |
+| JS `entry-373aba88…` | 200 |
+| CSS `web-5ee4f55…` | 200 |
 
-Hosting: GitHub Pages (`gh-pages` branch, full Expo web export with base-path rewrites).
+Hosting: GitHub Pages (`gh-pages` branch / Actions deploy of `public/` full Expo web SPA).
 
-## Local
-`http://127.0.0.1:8080/` — root-path static SPA (`python3 -m http.server` on `dist/`)
+## Local static
+`http://127.0.0.1:8080/` — serve `public/` with any static server.
 
 ## GitHub
 https://github.com/cantgetalonggta-png/veritas-investigative-intelligence  
 - `main`: source + `public/` SPA (root paths, Vercel-ready)  
-- `gh-pages`: live site (base-prefixed paths)
+- `gh-pages`: live site
 
-## Vercel — IMPOSSIBILITY (permission only)
-- Connected Vercel token on team `echo-ec69` (`team_kgQcPVmumwtmK3MdAGlxKJtg`): **list teams OK**, **create project/deploy = HTTP 403**
-- CLI: **Logged out** (no `VERCEL_TOKEN`)
-- Config ready: `vercel.json` → `outputDirectory: public`, SPA rewrites
+## Vercel — IMPOSSIBILITY (permission only, not code)
+- Connected integration team `team_kgQcPVmumwtmK3MdAGlxKJtg` (echo-ec69):
+  - `create_git_project` → **HTTP 403** (no Project Create)
+  - `create_deployment` production → **HTTP 403** (no Deploy permission)
+- Config ready in repo: `vercel.json` → `outputDirectory: public`, SPA rewrites, security headers
 
 **One-time human unlock (cannot be automated):**
-1. Vercel Dashboard → team **echo-ec69** → grant integration scopes: Project Create + Deploy  
-   OR run: `npx vercel login && cd /opt/veritas-work && npx vercel --prod --yes`
-2. After scopes: `create_git_project` / `npx vercel --prod` will publish to `*.vercel.app`
+1. Vercel Dashboard → team **echo-ec69** → grant connected integration scopes: **Project Create + Deploy**  
+   OR: `npx vercel login && cd <repo> && npx vercel --prod --yes`
+2. After scopes, auto-link via GitHub repo works.
 
 ## Quality gates
-- `pnpm check` PASS  
-- `expo export --platform web` PASS (12 routes, ~3.7MB)  
-- Manus API: `x-manus-api-key` → 200
+- Expo web export in `public/` (12 HTML routes + `_expo` assets)
+- Pages workflow: `.github/workflows/pages.yml`
+- Manus API: use header `x-manus-api-key` only
 
 ## Modules in live SPA
 Home, Search, Copilot, Analysis, Team, Vault (+ tab mirrors), assets, MaterialIcons, Expo Router static rendering.
+
+## Autonomy note
+Frontend fully built and **live via GitHub Pages**. Vercel secondary path blocked solely by OAuth scope on connected token. No further autonomous code path can open Vercel without human grant.
