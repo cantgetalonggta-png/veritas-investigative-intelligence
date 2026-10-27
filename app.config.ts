@@ -58,6 +58,8 @@ const publicRuntime = {
   apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? "",
 };
 
+const GH_PAGES_BASE = process.env.EXPO_PUBLIC_BASE_URL ?? "/veritas-investigative-intelligence";
+
 const config: ExpoConfig & { logoUrl: string } = {
   name: env.appName,
   slug: env.appSlug,
